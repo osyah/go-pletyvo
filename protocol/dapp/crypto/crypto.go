@@ -10,9 +10,11 @@ import (
 )
 
 type Signer interface {
+	Schema() byte
 	Sign([]byte) []byte
 	Public() []byte
 	Address() dapp.Address
+	Auth([]byte) dapp.AuthHeader
 }
 
 func NewAddress(schema byte, publicKey []byte) dapp.Address {
