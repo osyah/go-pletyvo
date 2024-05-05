@@ -8,7 +8,11 @@ import (
 	"encoding/json"
 )
 
-const EventTypeSize = 4
+const (
+	EventTypeSize = 4
+
+	EventBodyJSON = 0
+)
 
 type EventType [EventTypeSize]byte
 
@@ -23,12 +27,23 @@ func (e EventType) Protocol() byte  { return e[3] }
 
 type EventBody []byte
 
-func NewEventBody(data []byte) EventBody {
+func NewEventBody(data []byte, version byte, et EventType) EventBody {
 	body := make(EventBody, (len(data) + 5))
-
 	copy(body[5:], data[:])
 
+	body.SetVersion(version)
+	body.SetType(et)
+
 	return body
+}
+
+func NewEventBodyJSON(value any, et EventType) EventBody {
+	b, err := json.Marshal(value)
+	if err != nil {
+		panic("go-pletyvo/protocol/dapp: " + err.Error())
+	}
+
+	return NewEventBody(b, EventBodyJSON, et)
 }
 
 func (eb EventBody) Version() byte { return eb[0] }
