@@ -33,6 +33,8 @@ func GenerateED25519(r io.Reader) *ED25519 {
 	return NewED25519(seed)
 }
 
+func (ED25519) Schema() byte { return SchemaED25519 }
+
 func (ed ED25519) Sign(msg []byte) []byte {
 	return ed25519.Sign(ed.privateKey, msg)
 }
@@ -46,4 +48,12 @@ func (ed ED25519) Public() []byte {
 
 func (ed ED25519) Address() dapp.Address {
 	return NewAddress(SchemaED25519, ed.Public())
+}
+
+func (ed ED25519) Auth(msg []byte) dapp.AuthHeader {
+	return dapp.AuthHeader{
+		Schema:    SchemaED25519,
+		PublicKey: ed.Public(),
+		Signature: ed.Sign(msg),
+	}
 }
