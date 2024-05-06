@@ -3,6 +3,8 @@
 
 package dapp
 
+const Protocol = 0
+
 type AuthHeader struct {
 	Schema    byte   `json:"sch"`
 	PublicKey []byte `json:"pub"`
