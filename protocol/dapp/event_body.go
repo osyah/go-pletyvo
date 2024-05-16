@@ -65,6 +65,8 @@ func (eb EventBody) Data() []byte { return eb[5:] }
 
 func (eb EventBody) VerifyData() bool { return json.Valid(eb[5:]) }
 
+func (eb EventBody) Bytes() []byte { return eb[:] }
+
 func (eb EventBody) String() string {
 	return base64.StdEncoding.EncodeToString(eb[:])
 }
