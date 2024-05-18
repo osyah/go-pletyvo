@@ -7,6 +7,8 @@ import "github.com/osyah/hryzun/status"
 
 const (
 	CodeNil status.Code = iota
+	CodeInternal
+	CodeNotFound
 	CodeInvalidArgument
 )
 
