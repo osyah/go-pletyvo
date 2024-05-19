@@ -23,8 +23,9 @@ type EventQuery interface {
 }
 
 type EventRepository interface {
-	EventQuery
-	Create(context.Context, *Event) error
+	Get(ctx context.Context, ns uuid.UUID, option *pletyvo.QueryOption) ([]*Event, error)
+	GetByID(ctx context.Context, ns, id uuid.UUID) (*Event, error)
+	Create(ctx context.Context, ns uuid.UUID, event *Event) error
 }
 
 type EventResponse struct {
