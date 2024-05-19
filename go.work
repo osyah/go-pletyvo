@@ -4,4 +4,5 @@ use (
 	.
 	./client
 	./protocol/dapp/crypto
+	./repository/dapppebble
 )
