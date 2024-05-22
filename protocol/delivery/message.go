@@ -47,9 +47,10 @@ type MessageUpdateInput struct {
 }
 
 type MessageRepository interface {
-	MessageQuery
-	Create(context.Context, *Message) error
-	Update(context.Context, *MessageUpdateInput) error
+	Get(ctx context.Context, ns, ch uuid.UUID, option *pletyvo.QueryOption) ([]*Message, error)
+	GetByID(ctx context.Context, ns, ch, id uuid.UUID) (*Message, error)
+	Create(context.Context, uuid.UUID, *Message) error
+	Update(context.Context, uuid.UUID, *MessageUpdateInput) error
 }
 
 type MessageService interface {

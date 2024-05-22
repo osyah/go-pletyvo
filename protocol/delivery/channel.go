@@ -43,9 +43,9 @@ type ChannelUpdateInput struct {
 }
 
 type ChannelRepository interface {
-	ChannelQuery
-	Create(context.Context, *Channel) error
-	Update(context.Context, *ChannelUpdateInput) error
+	GetByID(ctx context.Context, ns, id uuid.UUID) (*Channel, error)
+	Create(context.Context, uuid.UUID, *Channel) error
+	Update(context.Context, uuid.UUID, *ChannelUpdateInput) error
 }
 
 type ChannelService interface {
