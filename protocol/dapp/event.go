@@ -18,7 +18,7 @@ type Event struct {
 }
 
 type EventQuery interface {
-	Get(context.Context, *pletyvo.QueryOption) ([]*Event, error)
+	Get(context.Context, ...*pletyvo.QueryOption) ([]*Event, error)
 	GetByID(context.Context, uuid.UUID) (*Event, error)
 }
 
