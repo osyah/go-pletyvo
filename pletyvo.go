@@ -3,7 +3,11 @@
 
 package pletyvo
 
-import "github.com/osyah/hryzun/status"
+import (
+	"github.com/google/uuid"
+
+	"github.com/osyah/hryzun/status"
+)
 
 const (
 	CodeNil status.Code = iota
@@ -15,6 +19,6 @@ const (
 type QueryOption struct {
 	Limit  int
 	Order  bool
-	After  []byte
-	Before []byte
+	After  uuid.UUID
+	Before uuid.UUID
 }
