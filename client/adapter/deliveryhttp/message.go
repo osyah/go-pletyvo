@@ -35,24 +35,28 @@ func NewMessage(engine engine.HTTP, signer crypto.Signer, event dapp.EventServic
 	}
 }
 
-func (m Message) Get(ctx context.Context, id uuid.UUID, option *pletyvo.QueryOption) ([]*delivery.Message, error) {
-	if option.Limit < 1 || option.Limit > 20 {
-		option.Limit = 20
+func (m Message) Get(ctx context.Context, ch uuid.UUID, opts ...*pletyvo.QueryOption) ([]*delivery.Message, error) {
+	var (
+		messages []*delivery.Message
+		option   string
+	)
+
+	if opts != nil {
+		messages = make([]*delivery.Message, opts[0].Limit)
+		option = opts[0].String()
 	}
 
-	messages := make([]*delivery.Message, option.Limit)
-
-	if err := m.engine.Get(ctx, fmt.Sprintf(messagesPath, id), &messages); err != nil {
+	if err := m.engine.Get(ctx, (fmt.Sprintf(messagesPath, ch) + option), &messages); err != nil {
 		return nil, err
 	}
 
 	return messages, nil
 }
 
-func (m Message) GetByID(ctx context.Context, channel uuid.UUID, id uuid.UUID) (*delivery.Message, error) {
+func (m Message) GetByID(ctx context.Context, ch uuid.UUID, id uuid.UUID) (*delivery.Message, error) {
 	var message delivery.Message
 
-	if err := m.engine.Get(ctx, fmt.Sprintf(messagePath, channel, id), &message); err != nil {
+	if err := m.engine.Get(ctx, fmt.Sprintf(messagePath, ch, id), &message); err != nil {
 		return nil, err
 	}
 
