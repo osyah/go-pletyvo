@@ -32,7 +32,7 @@ type Message struct {
 }
 
 type MessageQuery interface {
-	Get(context.Context, uuid.UUID, *pletyvo.QueryOption) ([]*Message, error)
+	Get(context.Context, uuid.UUID, ...*pletyvo.QueryOption) ([]*Message, error)
 	GetByID(ctx context.Context, channel uuid.UUID, id uuid.UUID) (*Message, error)
 }
 
