@@ -19,14 +19,18 @@ func NewEvent(engine engine.HTTP) *Event {
 	return &Event{engine: engine}
 }
 
-func (e Event) Get(ctx context.Context, option *pletyvo.QueryOption) ([]*dapp.Event, error) {
-	if option.Limit < 1 || option.Limit > 20 {
-		option.Limit = 20
+func (e Event) Get(ctx context.Context, opts ...*pletyvo.QueryOption) ([]*dapp.Event, error) {
+	var (
+		events []*dapp.Event
+		option string
+	)
+
+	if opts != nil {
+		events = make([]*dapp.Event, opts[0].Limit)
+		option = opts[0].String()
 	}
 
-	events := make([]*dapp.Event, option.Limit)
-
-	if err := e.engine.Get(ctx, "/dapp/v1/events", &events); err != nil {
+	if err := e.engine.Get(ctx, ("/dapp/v1/events" + option), &events); err != nil {
 		return nil, err
 	}
 
@@ -34,21 +38,21 @@ func (e Event) Get(ctx context.Context, option *pletyvo.QueryOption) ([]*dapp.Ev
 }
 
 func (e Event) GetByID(ctx context.Context, id uuid.UUID) (*dapp.Event, error) {
-	var event *dapp.Event
+	var event dapp.Event
 
 	if err := e.engine.Get(ctx, ("/dapp/v1/events/" + id.String()), &event); err != nil {
 		return nil, err
 	}
 
-	return event, nil
+	return &event, nil
 }
 
 func (e Event) Create(ctx context.Context, input *dapp.EventInput) (*dapp.EventResponse, error) {
-	var response *dapp.EventResponse
+	var response dapp.EventResponse
 
 	if err := e.engine.Post(ctx, "/dapp/v1/events", input, &response); err != nil {
 		return nil, err
 	}
 
-	return response, nil
+	return &response, nil
 }
