@@ -19,12 +19,12 @@ func NewMessage(db *pebble.DB) *Message {
 	return &Message{db: db}
 }
 
-func (Message) key(ns, ch, id []byte, sufix ...byte) []byte {
+func (Message) key(ns, ch, id uuid.UUID, sufix ...byte) []byte {
 	var key []byte
 
-	if id != nil {
+	if id != uuid.Nil {
 		key = make([]byte, 49)
-		copy(key[33:], id)
+		copy(key[33:], id[:])
 	} else {
 		key = make([]byte, 34)
 		key[33] = sufix[0]
@@ -32,8 +32,8 @@ func (Message) key(ns, ch, id []byte, sufix ...byte) []byte {
 
 	key[0] = delivery.Protocol
 
-	copy(key[1:], ns)
-	copy(key[17:], ch)
+	copy(key[1:], ns[:])
+	copy(key[17:], ch[:])
 
 	return key
 }
@@ -42,8 +42,8 @@ func (m Message) Get(ctx context.Context, ns, ch uuid.UUID, option *pletyvo.Quer
 	messages := make([]*delivery.Message, 0, option.Limit)
 
 	iter, err := m.db.NewIterWithContext(ctx, &pebble.IterOptions{
-		LowerBound: m.key(ns[:], ch[:], option.After, 0),
-		UpperBound: m.key(ns[:], ch[:], option.Before, 255),
+		LowerBound: m.key(ns, ch, option.After, 0),
+		UpperBound: m.key(ns, ch, option.Before, 255),
 	})
 	if err != nil {
 		return nil, err
@@ -66,7 +66,7 @@ func (m Message) Get(ctx context.Context, ns, ch uuid.UUID, option *pletyvo.Quer
 		next = iter.Prev
 	}
 
-	if option.After != nil {
+	if option.After != uuid.Nil {
 		if !next() {
 			return nil, pletyvo.CodeNotFound
 		}
@@ -93,7 +93,7 @@ func (m Message) Get(ctx context.Context, ns, ch uuid.UUID, option *pletyvo.Quer
 }
 
 func (m Message) GetByID(ctx context.Context, ns, ch, id uuid.UUID) (*delivery.Message, error) {
-	message, err := m.getByID(m.key(ns[:], ch[:], id[:]))
+	message, err := m.getByID(m.key(ns, ch, id))
 	if err != nil {
 		return nil, err
 	}
@@ -121,11 +121,11 @@ func (m Message) getByID(key []byte) (*delivery.Message, error) {
 }
 
 func (m Message) Create(ctx context.Context, ns uuid.UUID, message *delivery.Message) error {
-	return m.db.Set(m.key(ns[:], message.Channel[:], message.ID[:]), m.marshal(message), pebble.Sync)
+	return m.db.Set(m.key(ns, message.Channel, message.ID), m.marshal(message), pebble.Sync)
 }
 
 func (m Message) Update(ctx context.Context, ns uuid.UUID, input *delivery.MessageUpdateInput) error {
-	key := m.key(ns[:], input.Channel[:], input.Message[:])
+	key := m.key(ns, input.Channel, input.Message)
 
 	message, err := m.getByID(key)
 	if err != nil {
