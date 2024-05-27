@@ -19,12 +19,12 @@ func NewEvent(db *pebble.DB) *Event {
 	return &Event{db: db}
 }
 
-func (Event) key(ns, id []byte, sufix ...byte) []byte {
+func (Event) key(ns, id uuid.UUID, sufix ...byte) []byte {
 	var key []byte
 
-	if id != nil {
+	if id != uuid.Nil {
 		key = make([]byte, 33)
-		copy(key[17:], id)
+		copy(key[17:], id[:])
 	} else {
 		key = make([]byte, 18)
 		key[17] = sufix[0]
@@ -40,8 +40,8 @@ func (e Event) Get(ctx context.Context, ns uuid.UUID, option *pletyvo.QueryOptio
 	events := make([]*dapp.Event, 0, option.Limit)
 
 	iter, err := e.db.NewIterWithContext(ctx, &pebble.IterOptions{
-		LowerBound: e.key(ns[:], option.After, 0),
-		UpperBound: e.key(ns[:], option.Before, 255),
+		LowerBound: e.key(ns, option.After, 0),
+		UpperBound: e.key(ns, option.Before, 255),
 	})
 	if err != nil {
 		return nil, err
@@ -64,7 +64,7 @@ func (e Event) Get(ctx context.Context, ns uuid.UUID, option *pletyvo.QueryOptio
 		next = iter.Prev
 	}
 
-	if option.After != nil {
+	if option.After != uuid.Nil {
 		if !next() {
 			return nil, pletyvo.CodeNotFound
 		}
@@ -89,7 +89,7 @@ func (e Event) Get(ctx context.Context, ns uuid.UUID, option *pletyvo.QueryOptio
 }
 
 func (e Event) GetByID(ctx context.Context, ns, id uuid.UUID) (*dapp.Event, error) {
-	b, closer, err := e.db.Get(e.key(ns[:], id[:]))
+	b, closer, err := e.db.Get(e.key(ns, id))
 	if err != nil {
 		return nil, err
 	}
@@ -107,5 +107,5 @@ func (e Event) GetByID(ctx context.Context, ns, id uuid.UUID) (*dapp.Event, erro
 }
 
 func (e Event) Create(ctx context.Context, ns uuid.UUID, event *dapp.Event) error {
-	return e.db.Set(e.key(ns[:], event.ID[:]), e.marshal(event), pebble.Sync)
+	return e.db.Set(e.key(ns, event.ID), e.marshal(event), pebble.Sync)
 }
