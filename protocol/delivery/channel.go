@@ -7,7 +7,9 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/osyah/hryzun/status"
 
+	"github.com/osyah/go-pletyvo"
 	"github.com/osyah/go-pletyvo/protocol/dapp"
 )
 
@@ -37,9 +39,21 @@ type ChannelCreateInput struct {
 	Name string `json:"name"`
 }
 
+func (cci ChannelCreateInput) Validate() error {
+	if len(cci.Name) > 40 {
+		return status.New(pletyvo.CodeInvalidArgument, "invalid name length")
+	}
+
+	return nil
+}
+
 type ChannelUpdateInput struct {
 	ChannelCreateInput
 	Channel uuid.UUID `json:"channel"`
+}
+
+func (cui ChannelUpdateInput) Validate() error {
+	return cui.ChannelCreateInput.Validate()
 }
 
 type ChannelRepository interface {
