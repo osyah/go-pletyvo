@@ -16,6 +16,7 @@ const (
 	CodeNil status.Code = iota
 	CodeInternal
 	CodeNotFound
+	CodePermissionDenied
 	CodeInvalidArgument
 )
 
