@@ -7,6 +7,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/osyah/hryzun/status"
 
 	"github.com/osyah/go-pletyvo"
 	"github.com/osyah/go-pletyvo/protocol/dapp"
@@ -41,9 +42,21 @@ type MessageCreateInput struct {
 	Content string    `json:"content"`
 }
 
+func (mci MessageCreateInput) Validate() error {
+	if len(mci.Content) > 2048 {
+		return status.New(pletyvo.CodeInvalidArgument, "invalid content length")
+	}
+
+	return nil
+}
+
 type MessageUpdateInput struct {
 	MessageCreateInput
 	Message uuid.UUID `json:"message"`
+}
+
+func (mui MessageUpdateInput) Validate() error {
+	return mui.MessageCreateInput.Validate()
 }
 
 type MessageRepository interface {
