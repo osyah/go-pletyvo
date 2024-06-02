@@ -17,3 +17,15 @@ type Service struct {
 	Channel ChannelService
 	Message MessageService
 }
+
+type Executor struct {
+	Channel *ChannelExecutor
+	Message *MessageExecutor
+}
+
+func NewExecutor(repos *Repository) *Executor {
+	return &Executor{
+		Channel: NewChannelExecutor(repos.Channel),
+		Message: NewMessageExecutor(repos.Message),
+	}
+}
