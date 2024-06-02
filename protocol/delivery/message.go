@@ -71,3 +71,39 @@ type MessageService interface {
 	Create(context.Context, *MessageCreateInput) (*dapp.EventResponse, error)
 	Update(context.Context, *MessageUpdateInput) (*dapp.EventResponse, error)
 }
+
+type MessageExecutor struct{ repos MessageRepository }
+
+func NewMessageExecutor(repos MessageRepository) *MessageExecutor {
+	return &MessageExecutor{repos: repos}
+}
+
+func (me MessageExecutor) Create(ctx context.Context, base dapp.EventBase[MessageCreateInput]) error {
+	if err := base.Input.Validate(); err != nil {
+		return err
+	}
+
+	return me.repos.Create(ctx, base.Network, &Message{
+		ID:      base.ID,
+		Channel: base.Input.Channel,
+		Author:  base.Address,
+		Content: base.Input.Content,
+	})
+}
+
+func (me MessageExecutor) Update(ctx context.Context, base dapp.EventBase[MessageUpdateInput]) error {
+	if err := base.Input.Validate(); err != nil {
+		return err
+	}
+
+	message, err := me.repos.GetByID(ctx, base.Network, base.Input.Channel, base.Input.Message)
+	if err != nil {
+		return err
+	}
+
+	if message.Author != base.Address {
+		return pletyvo.CodePermissionDenied
+	}
+
+	return me.repos.Update(ctx, base.Network, base.Input)
+}
