@@ -3,6 +3,7 @@ go 1.21.1
 use (
 	.
 	./client
+	./node
 	./protocol/dapp/crypto
 	./repository/dapppebble
 	./repository/deliverypebble
