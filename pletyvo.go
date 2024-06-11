@@ -12,6 +12,10 @@ import (
 	"github.com/osyah/hryzun/status"
 )
 
+type ContextKey uint8
+
+const ContextKeyNetwork ContextKey = iota
+
 const (
 	CodeNil status.Code = iota
 	CodeInternal
