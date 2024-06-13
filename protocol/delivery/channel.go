@@ -57,9 +57,9 @@ func (cui ChannelUpdateInput) Validate() error {
 }
 
 type ChannelRepository interface {
-	GetByID(ctx context.Context, ns, id uuid.UUID) (*Channel, error)
-	Create(context.Context, uuid.UUID, *Channel) error
-	Update(context.Context, uuid.UUID, *ChannelUpdateInput) error
+	ChannelQuery
+	Create(context.Context, *Channel) error
+	Update(context.Context, *ChannelUpdateInput) error
 }
 
 type ChannelService interface {
@@ -79,10 +79,10 @@ func (ce ChannelExecutor) Create(ctx context.Context, base dapp.EventBase[Channe
 		return err
 	}
 
-	return ce.repos.Create(ctx, base.Network, &Channel{
+	return ce.repos.Create(ctx, &Channel{
 		ID:    base.ID,
 		Name:  base.Input.Name,
-		Owner: base.Address,
+		Owner: base.Author,
 	})
 }
 
@@ -91,14 +91,14 @@ func (ce ChannelExecutor) Update(ctx context.Context, base dapp.EventBase[Channe
 		return err
 	}
 
-	channel, err := ce.repos.GetByID(ctx, base.Network, base.Input.Channel)
+	channel, err := ce.repos.GetByID(ctx, base.Input.Channel)
 	if err != nil {
 		return err
 	}
 
-	if channel.Owner != base.Address {
+	if channel.Owner != base.Author {
 		return pletyvo.CodePermissionDenied
 	}
 
-	return ce.repos.Update(ctx, base.Network, base.Input)
+	return ce.repos.Update(ctx, base.Input)
 }

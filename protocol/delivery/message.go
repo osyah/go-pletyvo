@@ -33,7 +33,7 @@ type Message struct {
 }
 
 type MessageQuery interface {
-	Get(context.Context, uuid.UUID, ...*pletyvo.QueryOption) ([]*Message, error)
+	Get(context.Context, uuid.UUID, *pletyvo.QueryOption) ([]*Message, error)
 	GetByID(ctx context.Context, channel uuid.UUID, id uuid.UUID) (*Message, error)
 }
 
@@ -60,10 +60,9 @@ func (mui MessageUpdateInput) Validate() error {
 }
 
 type MessageRepository interface {
-	Get(ctx context.Context, ns, ch uuid.UUID, option *pletyvo.QueryOption) ([]*Message, error)
-	GetByID(ctx context.Context, ns, ch, id uuid.UUID) (*Message, error)
-	Create(context.Context, uuid.UUID, *Message) error
-	Update(context.Context, uuid.UUID, *MessageUpdateInput) error
+	MessageQuery
+	Create(context.Context, *Message) error
+	Update(context.Context, *MessageUpdateInput) error
 }
 
 type MessageService interface {
@@ -83,10 +82,10 @@ func (me MessageExecutor) Create(ctx context.Context, base dapp.EventBase[Messag
 		return err
 	}
 
-	return me.repos.Create(ctx, base.Network, &Message{
+	return me.repos.Create(ctx, &Message{
 		ID:      base.ID,
 		Channel: base.Input.Channel,
-		Author:  base.Address,
+		Author:  base.Author,
 		Content: base.Input.Content,
 	})
 }
@@ -96,14 +95,14 @@ func (me MessageExecutor) Update(ctx context.Context, base dapp.EventBase[Messag
 		return err
 	}
 
-	message, err := me.repos.GetByID(ctx, base.Network, base.Input.Channel, base.Input.Message)
+	message, err := me.repos.GetByID(ctx, base.Input.Channel, base.Input.Message)
 	if err != nil {
 		return err
 	}
 
-	if message.Author != base.Address {
+	if message.Author != base.Author {
 		return pletyvo.CodePermissionDenied
 	}
 
-	return me.repos.Update(ctx, base.Network, base.Input)
+	return me.repos.Update(ctx, base.Input)
 }
