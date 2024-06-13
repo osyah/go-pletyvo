@@ -19,18 +19,10 @@ func NewEvent(engine engine.HTTP) *Event {
 	return &Event{engine: engine}
 }
 
-func (e Event) Get(ctx context.Context, opts ...*pletyvo.QueryOption) ([]*dapp.Event, error) {
-	var (
-		events []*dapp.Event
-		option string
-	)
+func (e Event) Get(ctx context.Context, option *pletyvo.QueryOption) ([]*dapp.Event, error) {
+	events := make([]*dapp.Event, option.Limit)
 
-	if opts != nil {
-		events = make([]*dapp.Event, opts[0].Limit)
-		option = opts[0].String()
-	}
-
-	if err := e.engine.Get(ctx, ("/dapp/v1/events" + option), &events); err != nil {
+	if err := e.engine.Get(ctx, ("/dapp/v1/events" + option.String()), &events); err != nil {
 		return nil, err
 	}
 
