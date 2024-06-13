@@ -22,14 +22,13 @@ type EventHeader struct {
 }
 
 type EventQuery interface {
-	Get(context.Context, ...*pletyvo.QueryOption) ([]*Event, error)
+	Get(context.Context, *pletyvo.QueryOption) ([]*Event, error)
 	GetByID(context.Context, uuid.UUID) (*Event, error)
 }
 
 type EventRepository interface {
-	Get(ctx context.Context, ns uuid.UUID, option *pletyvo.QueryOption) ([]*Event, error)
-	GetByID(ctx context.Context, ns, id uuid.UUID) (*Event, error)
-	Create(ctx context.Context, ns uuid.UUID, event *Event) error
+	EventQuery
+	Create(context.Context, *Event) error
 }
 
 type EventResponse struct {
