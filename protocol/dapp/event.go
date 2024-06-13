@@ -12,7 +12,11 @@ import (
 )
 
 type Event struct {
+	*EventHeader
 	*EventInput
+}
+
+type EventHeader struct {
 	ID     uuid.UUID `json:"id"`
 	Author Address   `json:"author"`
 }
@@ -47,8 +51,6 @@ type EventInputVerifierFunc func(*EventInput) bool
 func (ei *EventInput) Verify(f EventInputVerifierFunc) bool { return f(ei) }
 
 type EventBase[T any] struct {
-	ID      uuid.UUID
-	Network uuid.UUID
-	Address Address
-	Input   *T
+	*EventHeader
+	Input *T
 }
