@@ -33,6 +33,7 @@ func (Event) marshal(event *dapp.Event) []byte {
 func (e Event) unmarshal(src []byte, event *dapp.Event) (err error) {
 	var fc easyproto.FieldContext
 
+	event.EventHeader = &dapp.EventHeader{}
 	event.EventInput = &dapp.EventInput{}
 
 	for len(src) > 0 {

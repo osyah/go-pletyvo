@@ -36,12 +36,13 @@ func (Event) key(ns, id uuid.UUID, sufix ...byte) []byte {
 	return key
 }
 
-func (e Event) Get(ctx context.Context, ns uuid.UUID, option *pletyvo.QueryOption) ([]*dapp.Event, error) {
+func (e Event) Get(ctx context.Context, option *pletyvo.QueryOption) ([]*dapp.Event, error) {
+	network := ctx.Value(pletyvo.ContextKeyNetwork).(uuid.UUID)
 	events := make([]*dapp.Event, 0, option.Limit)
 
 	iter, err := e.db.NewIterWithContext(ctx, &pebble.IterOptions{
-		LowerBound: e.key(ns, option.After, 0),
-		UpperBound: e.key(ns, option.Before, 255),
+		LowerBound: e.key(network, option.After, 0),
+		UpperBound: e.key(network, option.Before, 255),
 	})
 	if err != nil {
 		return nil, err
@@ -88,8 +89,10 @@ func (e Event) Get(ctx context.Context, ns uuid.UUID, option *pletyvo.QueryOptio
 	return events, nil
 }
 
-func (e Event) GetByID(ctx context.Context, ns, id uuid.UUID) (*dapp.Event, error) {
-	b, closer, err := e.db.Get(e.key(ns, id))
+func (e Event) GetByID(ctx context.Context, id uuid.UUID) (*dapp.Event, error) {
+	network := ctx.Value(pletyvo.ContextKeyNetwork).(uuid.UUID)
+
+	b, closer, err := e.db.Get(e.key(network, id))
 	if err != nil {
 		return nil, err
 	}
@@ -106,6 +109,7 @@ func (e Event) GetByID(ctx context.Context, ns, id uuid.UUID) (*dapp.Event, erro
 	return &event, nil
 }
 
-func (e Event) Create(ctx context.Context, ns uuid.UUID, event *dapp.Event) error {
-	return e.db.Set(e.key(ns, event.ID), e.marshal(event), pebble.Sync)
+func (e Event) Create(ctx context.Context, event *dapp.Event) error {
+	network := ctx.Value(pletyvo.ContextKeyNetwork).(uuid.UUID)
+	return e.db.Set(e.key(network, event.ID), e.marshal(event), pebble.Sync)
 }
