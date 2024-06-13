@@ -35,18 +35,10 @@ func NewMessage(engine engine.HTTP, signer crypto.Signer, event dapp.EventServic
 	}
 }
 
-func (m Message) Get(ctx context.Context, ch uuid.UUID, opts ...*pletyvo.QueryOption) ([]*delivery.Message, error) {
-	var (
-		messages []*delivery.Message
-		option   string
-	)
+func (m Message) Get(ctx context.Context, ch uuid.UUID, option *pletyvo.QueryOption) ([]*delivery.Message, error) {
+	messages := make([]*delivery.Message, option.Limit)
 
-	if opts != nil {
-		messages = make([]*delivery.Message, opts[0].Limit)
-		option = opts[0].String()
-	}
-
-	if err := m.engine.Get(ctx, (fmt.Sprintf(messagesPath, ch) + option), &messages); err != nil {
+	if err := m.engine.Get(ctx, (fmt.Sprintf(messagesPath, ch) + option.String()), &messages); err != nil {
 		return nil, err
 	}
 
