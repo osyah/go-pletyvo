@@ -26,10 +26,21 @@ var (
 )
 
 type Message struct {
-	ID      uuid.UUID    `json:"id"`
-	Channel uuid.UUID    `json:"channel"`
-	Author  dapp.Address `json:"author"`
-	Content string       `json:"content"`
+	*dapp.EventHeader
+	*MessageInput
+}
+
+type MessageInput struct {
+	Channel uuid.UUID `json:"channel"`
+	Content string    `json:"content"`
+}
+
+func (mi MessageInput) Validate() error {
+	if len(mi.Content) > 2048 {
+		return status.New(pletyvo.CodeInvalidArgument, "invalid content length")
+	}
+
+	return nil
 }
 
 type MessageQuery interface {
@@ -37,26 +48,19 @@ type MessageQuery interface {
 	GetByID(ctx context.Context, channel uuid.UUID, id uuid.UUID) (*Message, error)
 }
 
-type MessageCreateInput struct {
-	Channel uuid.UUID `json:"channel"`
-	Content string    `json:"content"`
-}
+type MessageCreateInput struct{ *MessageInput }
 
 func (mci MessageCreateInput) Validate() error {
-	if len(mci.Content) > 2048 {
-		return status.New(pletyvo.CodeInvalidArgument, "invalid content length")
-	}
-
-	return nil
+	return mci.MessageInput.Validate()
 }
 
 type MessageUpdateInput struct {
-	MessageCreateInput
+	*MessageInput
 	Message uuid.UUID `json:"message"`
 }
 
 func (mui MessageUpdateInput) Validate() error {
-	return mui.MessageCreateInput.Validate()
+	return mui.MessageInput.Validate()
 }
 
 type MessageRepository interface {
@@ -83,10 +87,8 @@ func (me MessageExecutor) Create(ctx context.Context, base dapp.EventBase[Messag
 	}
 
 	return me.repos.Create(ctx, &Message{
-		ID:      base.ID,
-		Channel: base.Input.Channel,
-		Author:  base.Author,
-		Content: base.Input.Content,
+		EventHeader:  base.EventHeader,
+		MessageInput: base.Input.MessageInput,
 	})
 }
 

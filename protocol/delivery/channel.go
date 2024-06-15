@@ -26,34 +26,39 @@ var (
 )
 
 type Channel struct {
-	ID    uuid.UUID    `json:"id"`
-	Name  string       `json:"name"`
-	Owner dapp.Address `json:"owner"`
+	*dapp.EventHeader
+	*ChannelInput
 }
 
-type ChannelQuery interface {
-	GetByID(context.Context, uuid.UUID) (*Channel, error)
-}
-
-type ChannelCreateInput struct {
+type ChannelInput struct {
 	Name string `json:"name"`
 }
 
-func (cci ChannelCreateInput) Validate() error {
-	if len(cci.Name) > 40 {
+func (ci ChannelInput) Validate() error {
+	if len(ci.Name) > 40 {
 		return status.New(pletyvo.CodeInvalidArgument, "invalid name length")
 	}
 
 	return nil
 }
 
+type ChannelQuery interface {
+	GetByID(context.Context, uuid.UUID) (*Channel, error)
+}
+
+type ChannelCreateInput struct{ *ChannelInput }
+
+func (cci ChannelCreateInput) Validate() error {
+	return cci.ChannelInput.Validate()
+}
+
 type ChannelUpdateInput struct {
-	ChannelCreateInput
+	*ChannelInput
 	Channel uuid.UUID `json:"channel"`
 }
 
 func (cui ChannelUpdateInput) Validate() error {
-	return cui.ChannelCreateInput.Validate()
+	return cui.ChannelInput.Validate()
 }
 
 type ChannelRepository interface {
@@ -80,9 +85,8 @@ func (ce ChannelExecutor) Create(ctx context.Context, base dapp.EventBase[Channe
 	}
 
 	return ce.repos.Create(ctx, &Channel{
-		ID:    base.ID,
-		Name:  base.Input.Name,
-		Owner: base.Author,
+		EventHeader:  base.EventHeader,
+		ChannelInput: base.Input.ChannelInput,
 	})
 }
 
@@ -96,7 +100,7 @@ func (ce ChannelExecutor) Update(ctx context.Context, base dapp.EventBase[Channe
 		return err
 	}
 
-	if channel.Owner != base.Author {
+	if channel.Author != base.Author {
 		return pletyvo.CodePermissionDenied
 	}
 
