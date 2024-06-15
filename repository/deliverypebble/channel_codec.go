@@ -19,7 +19,7 @@ func (Channel) marshal(channel *delivery.Channel) []byte {
 
 	mm := m.MessageMarshaler()
 	mm.AppendString(1, channel.Name)
-	mm.AppendBytes(2, channel.Owner[:])
+	mm.AppendBytes(2, channel.Author[:])
 
 	dst := m.Marshal(nil)
 
@@ -30,6 +30,9 @@ func (Channel) marshal(channel *delivery.Channel) []byte {
 
 func (Channel) unmarshal(src []byte, channel *delivery.Channel) (err error) {
 	var fc easyproto.FieldContext
+
+	channel.EventHeader = &dapp.EventHeader{}
+	channel.ChannelInput = &delivery.ChannelInput{}
 
 	for len(src) > 0 {
 		src, err = fc.NextField(src)
@@ -52,15 +55,15 @@ func (Channel) unmarshal(src []byte, channel *delivery.Channel) (err error) {
 
 			channel.Name = strings.Clone(name)
 		case 2:
-			owner, ok := fc.Bytes()
+			author, ok := fc.Bytes()
 			if !ok {
 				return status.New(
 					pletyvo.CodeInternal,
-					"go-pletyvo/repository/deliverypebble: cannot read owner",
+					"go-pletyvo/repository/deliverypebble: cannot read author",
 				)
 			}
 
-			channel.Owner = dapp.Address(owner)
+			channel.Author = dapp.Address(author)
 		}
 	}
 

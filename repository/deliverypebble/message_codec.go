@@ -31,6 +31,9 @@ func (m Message) marshal(message *delivery.Message) []byte {
 func (m Message) unmarshal(src []byte, message *delivery.Message) (err error) {
 	var fc easyproto.FieldContext
 
+	message.EventHeader = &dapp.EventHeader{}
+	message.MessageInput = &delivery.MessageInput{}
+
 	for len(src) > 0 {
 		src, err = fc.NextField(src)
 		if err != nil {

@@ -38,12 +38,13 @@ func (Message) key(ns, ch, id uuid.UUID, sufix ...byte) []byte {
 	return key
 }
 
-func (m Message) Get(ctx context.Context, ns, ch uuid.UUID, option *pletyvo.QueryOption) ([]*delivery.Message, error) {
+func (m Message) Get(ctx context.Context, ch uuid.UUID, option *pletyvo.QueryOption) ([]*delivery.Message, error) {
+	network := ctx.Value(pletyvo.ContextKeyNetwork).(uuid.UUID)
 	messages := make([]*delivery.Message, 0, option.Limit)
 
 	iter, err := m.db.NewIterWithContext(ctx, &pebble.IterOptions{
-		LowerBound: m.key(ns, ch, option.After, 0),
-		UpperBound: m.key(ns, ch, option.Before, 255),
+		LowerBound: m.key(network, ch, option.After, 0),
+		UpperBound: m.key(network, ch, option.Before, 255),
 	})
 	if err != nil {
 		return nil, err
@@ -92,8 +93,10 @@ func (m Message) Get(ctx context.Context, ns, ch uuid.UUID, option *pletyvo.Quer
 	return messages, nil
 }
 
-func (m Message) GetByID(ctx context.Context, ns, ch, id uuid.UUID) (*delivery.Message, error) {
-	message, err := m.getByID(m.key(ns, ch, id))
+func (m Message) GetByID(ctx context.Context, ch, id uuid.UUID) (*delivery.Message, error) {
+	network := ctx.Value(pletyvo.ContextKeyNetwork).(uuid.UUID)
+
+	message, err := m.getByID(m.key(network, ch, id))
 	if err != nil {
 		return nil, err
 	}
@@ -120,12 +123,16 @@ func (m Message) getByID(key []byte) (*delivery.Message, error) {
 	return &message, nil
 }
 
-func (m Message) Create(ctx context.Context, ns uuid.UUID, message *delivery.Message) error {
-	return m.db.Set(m.key(ns, message.Channel, message.ID), m.marshal(message), pebble.Sync)
+func (m Message) Create(ctx context.Context, message *delivery.Message) error {
+	network := ctx.Value(pletyvo.ContextKeyNetwork).(uuid.UUID)
+	key := m.key(network, message.Channel, message.ID)
+
+	return m.db.Set(key, m.marshal(message), pebble.Sync)
 }
 
-func (m Message) Update(ctx context.Context, ns uuid.UUID, input *delivery.MessageUpdateInput) error {
-	key := m.key(ns, input.Channel, input.Message)
+func (m Message) Update(ctx context.Context, input *delivery.MessageUpdateInput) error {
+	network := ctx.Value(pletyvo.ContextKeyNetwork).(uuid.UUID)
+	key := m.key(network, input.Channel, input.Message)
 
 	message, err := m.getByID(key)
 	if err != nil {
