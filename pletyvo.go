@@ -22,6 +22,7 @@ const (
 	CodeNotFound
 	CodePermissionDenied
 	CodeInvalidArgument
+	CodeUnauthorized
 )
 
 type QueryOption struct {
