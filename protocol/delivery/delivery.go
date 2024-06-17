@@ -8,6 +8,11 @@ const (
 	Version  = 0
 )
 
+type Query struct {
+	Channel ChannelQuery
+	Message MessageQuery
+}
+
 type Repository struct {
 	Channel ChannelRepository
 	Message MessageRepository
