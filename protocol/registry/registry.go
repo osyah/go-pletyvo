@@ -8,6 +8,8 @@ const (
 	Version  = 0
 )
 
+type Query struct{ Network NetworkQuery }
+
 type Repository struct{ Network NetworkRepository }
 
 type Service struct{ Network NetworkService }

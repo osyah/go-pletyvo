@@ -7,7 +7,9 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/osyah/hryzun/status"
 
+	"github.com/osyah/go-pletyvo"
 	"github.com/osyah/go-pletyvo/protocol/dapp"
 )
 
@@ -24,22 +26,39 @@ var (
 )
 
 type Network struct {
-	ID    uuid.UUID    `json:"id"`
-	Name  string       `json:"name"`
-	Owner dapp.Address `json:"owner"`
+	*dapp.EventHeader
+	*NetworkInput
+}
+
+type NetworkInput struct {
+	Name string `json:"name"`
+}
+
+func (ni NetworkInput) Validate() error {
+	if len(ni.Name) > 40 {
+		return status.New(pletyvo.CodeInvalidArgument, "invalid name length")
+	}
+
+	return nil
 }
 
 type NetworkQuery interface {
 	GetByID(context.Context, uuid.UUID) (*Network, error)
 }
 
-type NetworkCreateInput struct {
-	Name string `json:"name"`
+type NetworkCreateInput struct{ *NetworkInput }
+
+func (nci NetworkCreateInput) Validate() error {
+	return nci.NetworkInput.Validate()
 }
 
 type NetworkUpdateInput struct {
-	NetworkCreateInput
+	*NetworkInput
 	Network uuid.UUID `json:"network"`
+}
+
+func (nui NetworkUpdateInput) Validate() error {
+	return nui.NetworkInput.Validate()
 }
 
 type NetworkRepository interface {
