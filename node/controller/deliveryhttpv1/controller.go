@@ -9,16 +9,16 @@ import (
 	"github.com/osyah/go-pletyvo/protocol/delivery"
 )
 
-type Controller struct{ service *delivery.Service }
+type Controller struct{ query *delivery.Query }
 
-func New(service *delivery.Service) *Controller {
-	return &Controller{service: service}
+func New(query *delivery.Query) *Controller {
+	return &Controller{query: query}
 }
 
 func (c Controller) RegisterRoutes(router fiber.Router) {
 	v1 := router.Group("/v1")
 	{
-		NewChannel(c.service.Channel).RegisterRoutes(v1)
-		NewMessage(c.service.Message).RegisterRoutes(v1)
+		NewChannel(c.query.Channel).RegisterRoutes(v1)
+		NewMessage(c.query.Message).RegisterRoutes(v1)
 	}
 }
