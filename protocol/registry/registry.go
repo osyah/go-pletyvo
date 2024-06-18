@@ -4,7 +4,7 @@
 package registry
 
 const (
-	Protocol = 3
+	Protocol = 1
 	Version  = 0
 )
 
