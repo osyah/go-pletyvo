@@ -13,3 +13,9 @@ type Query struct{ Network NetworkQuery }
 type Repository struct{ Network NetworkRepository }
 
 type Service struct{ Network NetworkService }
+
+type Executor struct{ Network *NetworkExecutor }
+
+func NewExecutor(repos *Repository) *Executor {
+	return &Executor{Network: NewNetworkExecutor(repos.Network)}
+}
