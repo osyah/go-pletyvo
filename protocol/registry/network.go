@@ -6,7 +6,6 @@ package registry
 import (
 	"context"
 
-	"github.com/google/uuid"
 	"github.com/osyah/hryzun/status"
 
 	"github.com/osyah/go-pletyvo"
@@ -43,7 +42,7 @@ func (ni NetworkInput) Validate() error {
 }
 
 type NetworkQuery interface {
-	GetByID(context.Context, uuid.UUID) (*Network, error)
+	Get(context.Context) (*Network, error)
 }
 
 type NetworkCreateInput struct{ *NetworkInput }
@@ -52,10 +51,7 @@ func (nci NetworkCreateInput) Validate() error {
 	return nci.NetworkInput.Validate()
 }
 
-type NetworkUpdateInput struct {
-	*NetworkInput
-	Network uuid.UUID `json:"network"`
-}
+type NetworkUpdateInput struct{ *NetworkInput }
 
 func (nui NetworkUpdateInput) Validate() error {
 	return nui.NetworkInput.Validate()
@@ -95,7 +91,7 @@ func (ne NetworkExecutor) Update(ctx context.Context, base dapp.EventBase[Networ
 		return err
 	}
 
-	network, err := ne.repos.GetByID(ctx, base.Input.Network)
+	network, err := ne.repos.Get(ctx)
 	if err != nil {
 		return err
 	}
