@@ -7,4 +7,5 @@ use (
 	./protocol/dapp/crypto
 	./repository/dapppebble
 	./repository/deliverypebble
+	./repository/registrypebble
 )
