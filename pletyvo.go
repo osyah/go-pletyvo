@@ -55,7 +55,7 @@ func (qo QueryOption) String() string {
 				continue
 			}
 		case 2:
-			if qo.After != uuid.Nil {
+			if qo.After.Version() != 0 {
 				buf.WriteByte(token)
 				buf.WriteString("after=")
 				buf.WriteString(qo.After.String())
@@ -63,7 +63,7 @@ func (qo QueryOption) String() string {
 				continue
 			}
 		case 3:
-			if qo.Before != uuid.Nil {
+			if qo.Before.Version() != 0 {
 				buf.WriteByte(token)
 				buf.WriteString("before=")
 				buf.WriteString(qo.Before.String())
