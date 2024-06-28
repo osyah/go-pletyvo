@@ -19,15 +19,15 @@ func NewMessage(db *pebble.DB) *Message {
 	return &Message{db: db}
 }
 
-func (Message) key(ns, ch, id uuid.UUID, sufix ...byte) []byte {
+func (Message) key(ns, ch, id *uuid.UUID, sufix byte) []byte {
 	var key []byte
 
-	if id != uuid.Nil {
+	if id.Version() != 0 {
 		key = make([]byte, 49)
 		copy(key[33:], id[:])
 	} else {
 		key = make([]byte, 34)
-		key[33] = sufix[0]
+		key[33] = sufix
 	}
 
 	key[0] = delivery.Protocol
@@ -39,12 +39,16 @@ func (Message) key(ns, ch, id uuid.UUID, sufix ...byte) []byte {
 }
 
 func (m Message) Get(ctx context.Context, ch uuid.UUID, option *pletyvo.QueryOption) ([]*delivery.Message, error) {
-	network := ctx.Value(pletyvo.ContextKeyNetwork).(uuid.UUID)
+	network, ok := ctx.Value(pletyvo.ContextKeyNetwork).(*uuid.UUID)
+	if !ok {
+		network = &uuid.Nil
+	}
+
 	messages := make([]*delivery.Message, 0, option.Limit)
 
 	iter, err := m.db.NewIterWithContext(ctx, &pebble.IterOptions{
-		LowerBound: m.key(network, ch, option.After, 0),
-		UpperBound: m.key(network, ch, option.Before, 255),
+		LowerBound: m.key(network, &ch, &option.After, 0),
+		UpperBound: m.key(network, &ch, &option.Before, 255),
 	})
 	if err != nil {
 		return nil, err
@@ -67,7 +71,7 @@ func (m Message) Get(ctx context.Context, ch uuid.UUID, option *pletyvo.QueryOpt
 		next = iter.Prev
 	}
 
-	if option.After != uuid.Nil {
+	if option.After.Version() != 0 {
 		if !next() {
 			return nil, pletyvo.CodeNotFound
 		}
@@ -94,21 +98,12 @@ func (m Message) Get(ctx context.Context, ch uuid.UUID, option *pletyvo.QueryOpt
 }
 
 func (m Message) GetByID(ctx context.Context, ch, id uuid.UUID) (*delivery.Message, error) {
-	network := ctx.Value(pletyvo.ContextKeyNetwork).(uuid.UUID)
-
-	message, err := m.getByID(m.key(network, ch, id))
-	if err != nil {
-		return nil, err
+	network, ok := ctx.Value(pletyvo.ContextKeyNetwork).(*uuid.UUID)
+	if !ok {
+		network = &uuid.Nil
 	}
 
-	message.ID = id
-	message.Channel = ch
-
-	return message, nil
-}
-
-func (m Message) getByID(key []byte) (*delivery.Message, error) {
-	b, closer, err := m.db.Get(key)
+	b, closer, err := m.db.Get(m.key(network, &ch, &id, 0))
 	if err != nil {
 		return nil, err
 	}
@@ -120,26 +115,44 @@ func (m Message) getByID(key []byte) (*delivery.Message, error) {
 		return nil, err
 	}
 
+	message.ID = id
+	message.Channel = ch
+
 	return &message, nil
 }
 
 func (m Message) Create(ctx context.Context, message *delivery.Message) error {
-	network := ctx.Value(pletyvo.ContextKeyNetwork).(uuid.UUID)
-	key := m.key(network, message.Channel, message.ID)
+	network, ok := ctx.Value(pletyvo.ContextKeyNetwork).(*uuid.UUID)
+	if !ok {
+		network = &uuid.Nil
+	}
+
+	key := m.key(network, &message.Channel, &message.ID, 0)
 
 	return m.db.Set(key, m.marshal(message), pebble.Sync)
 }
 
 func (m Message) Update(ctx context.Context, input *delivery.MessageUpdateInput) error {
-	network := ctx.Value(pletyvo.ContextKeyNetwork).(uuid.UUID)
-	key := m.key(network, input.Channel, input.Message)
+	network, ok := ctx.Value(pletyvo.ContextKeyNetwork).(*uuid.UUID)
+	if !ok {
+		network = &uuid.Nil
+	}
 
-	message, err := m.getByID(key)
+	key := m.key(network, &input.Channel, &input.Message, 0)
+
+	b, closer, err := m.db.Get(key)
 	if err != nil {
+		return err
+	}
+	defer closer.Close()
+
+	var message delivery.Message
+
+	if err := m.unmarshal(b, &message); err != nil {
 		return err
 	}
 
 	message.Content = input.Content
 
-	return m.db.Set(key, m.marshal(message), pebble.Sync)
+	return m.db.Set(key, m.marshal(&message), pebble.Sync)
 }
