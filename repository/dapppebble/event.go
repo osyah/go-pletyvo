@@ -19,15 +19,15 @@ func NewEvent(db *pebble.DB) *Event {
 	return &Event{db: db}
 }
 
-func (Event) key(ns, id uuid.UUID, sufix ...byte) []byte {
+func (Event) key(ns, id *uuid.UUID, sufix byte) []byte {
 	var key []byte
 
-	if id != uuid.Nil {
+	if id.Version() != 0 {
 		key = make([]byte, 33)
 		copy(key[17:], id[:])
 	} else {
 		key = make([]byte, 18)
-		key[17] = sufix[0]
+		key[17] = sufix
 	}
 
 	key[0] = dapp.Protocol
@@ -37,12 +37,16 @@ func (Event) key(ns, id uuid.UUID, sufix ...byte) []byte {
 }
 
 func (e Event) Get(ctx context.Context, option *pletyvo.QueryOption) ([]*dapp.Event, error) {
-	network := ctx.Value(pletyvo.ContextKeyNetwork).(uuid.UUID)
+	network, ok := ctx.Value(pletyvo.ContextKeyNetwork).(*uuid.UUID)
+	if !ok {
+		network = &uuid.Nil
+	}
+
 	events := make([]*dapp.Event, 0, option.Limit)
 
 	iter, err := e.db.NewIterWithContext(ctx, &pebble.IterOptions{
-		LowerBound: e.key(network, option.After, 0),
-		UpperBound: e.key(network, option.Before, 255),
+		LowerBound: e.key(network, &option.After, 0),
+		UpperBound: e.key(network, &option.Before, 255),
 	})
 	if err != nil {
 		return nil, err
@@ -65,7 +69,7 @@ func (e Event) Get(ctx context.Context, option *pletyvo.QueryOption) ([]*dapp.Ev
 		next = iter.Prev
 	}
 
-	if option.After != uuid.Nil {
+	if option.After.Version() != 0 {
 		if !next() {
 			return nil, pletyvo.CodeNotFound
 		}
@@ -90,9 +94,12 @@ func (e Event) Get(ctx context.Context, option *pletyvo.QueryOption) ([]*dapp.Ev
 }
 
 func (e Event) GetByID(ctx context.Context, id uuid.UUID) (*dapp.Event, error) {
-	network := ctx.Value(pletyvo.ContextKeyNetwork).(uuid.UUID)
+	network, ok := ctx.Value(pletyvo.ContextKeyNetwork).(*uuid.UUID)
+	if !ok {
+		network = &uuid.Nil
+	}
 
-	b, closer, err := e.db.Get(e.key(network, id))
+	b, closer, err := e.db.Get(e.key(network, &id, 0))
 	if err != nil {
 		return nil, err
 	}
@@ -110,6 +117,10 @@ func (e Event) GetByID(ctx context.Context, id uuid.UUID) (*dapp.Event, error) {
 }
 
 func (e Event) Create(ctx context.Context, event *dapp.Event) error {
-	network := ctx.Value(pletyvo.ContextKeyNetwork).(uuid.UUID)
-	return e.db.Set(e.key(network, event.ID), e.marshal(event), pebble.Sync)
+	network, ok := ctx.Value(pletyvo.ContextKeyNetwork).(*uuid.UUID)
+	if !ok {
+		network = &uuid.Nil
+	}
+
+	return e.db.Set(e.key(network, &event.ID, 0), e.marshal(event), pebble.Sync)
 }
