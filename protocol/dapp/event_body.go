@@ -27,23 +27,20 @@ func (e EventType) Protocol() byte  { return e[3] }
 
 type EventBody []byte
 
-func NewEventBody(data []byte, version byte, et EventType) EventBody {
-	body := make(EventBody, (len(data) + 5))
-	copy(body[5:], data[:])
-
-	body.SetVersion(version)
-	body.SetType(et)
-
-	return body
-}
-
 func NewEventBodyJSON(value any, et EventType) EventBody {
 	b, err := json.Marshal(value)
 	if err != nil {
 		panic("go-pletyvo/protocol/dapp: " + err.Error())
 	}
 
-	return NewEventBody(b, EventBodyJSON, et)
+	body := make(EventBody, (len(b) + 5))
+
+	body.SetVersion(EventBodyJSON)
+	body.SetType(et)
+
+	copy(body[5:], b[:])
+
+	return body
 }
 
 func (eb EventBody) Version() byte { return eb[0] }
@@ -70,3 +67,5 @@ func (eb EventBody) Bytes() []byte { return eb[:] }
 func (eb EventBody) String() string {
 	return base64.StdEncoding.EncodeToString(eb[:])
 }
+
+func (eb EventBody) Unmarshal(v any) error { return json.Unmarshal(eb, v) }
