@@ -11,33 +11,32 @@ import (
 )
 
 func QueryOption(ctx *fiber.Ctx) (*pletyvo.QueryOption, error) {
-	var option pletyvo.QueryOption
+	var (
+		opt pletyvo.QueryOption
+		err error
+	)
 
 	if limit := ctx.QueryInt("limit"); limit != 0 {
-		option.Limit = limit
+		opt.Limit = limit
 	}
 
 	if sort := ctx.Query("order"); sort == "asc" {
-		option.Order = true
+		opt.Order = true
 	}
 
-	if after := ctx.Query("after"); after != "" {
-		id, err := uuid.Parse(after)
+	if after := ctx.Query("after"); len(after) != 0 {
+		opt.After, err = uuid.Parse(after)
 		if err != nil {
 			return nil, err
 		}
-
-		option.After = id
 	}
 
-	if before := ctx.Query("before"); before != "" {
-		id, err := uuid.Parse(before)
+	if before := ctx.Query("before"); len(before) != 0 {
+		opt.Before, err = uuid.Parse(before)
 		if err != nil {
 			return nil, err
 		}
-
-		option.Before = id
 	}
 
-	return &option, nil
+	return &opt, nil
 }
