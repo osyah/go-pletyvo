@@ -6,6 +6,10 @@ package dapp
 import (
 	"encoding/base64"
 	"encoding/json"
+
+	"github.com/osyah/hryzun/status"
+
+	"github.com/osyah/go-pletyvo"
 )
 
 const (
@@ -24,6 +28,8 @@ func (e EventType) Event() byte     { return e[0] }
 func (e EventType) Aggregate() byte { return e[1] }
 func (e EventType) Version() byte   { return e[2] }
 func (e EventType) Protocol() byte  { return e[3] }
+
+var ErrInvalidEventType = status.New(pletyvo.CodeInvalidArgument, "unsupported event type")
 
 type EventBody []byte
 
