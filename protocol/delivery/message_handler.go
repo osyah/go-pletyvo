@@ -6,9 +6,6 @@ package delivery
 import (
 	"context"
 
-	"github.com/osyah/hryzun/status"
-
-	"github.com/osyah/go-pletyvo"
 	"github.com/osyah/go-pletyvo/protocol/dapp"
 )
 
@@ -43,6 +40,6 @@ func (mh MessageHandler) Handle(ctx context.Context, event *dapp.Event) error {
 			Input:       &input,
 		})
 	default:
-		return status.New(pletyvo.CodeInvalidArgument, "unsupported body type")
+		return dapp.ErrInvalidEventType
 	}
 }
