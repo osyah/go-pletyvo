@@ -74,4 +74,4 @@ func (eb EventBody) String() string {
 	return base64.StdEncoding.EncodeToString(eb[:])
 }
 
-func (eb EventBody) Unmarshal(v any) error { return json.Unmarshal(eb, v) }
+func (eb EventBody) Unmarshal(v any) error { return json.Unmarshal(eb.Data(), v) }
