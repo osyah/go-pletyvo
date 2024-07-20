@@ -11,6 +11,8 @@ type AuthHeader struct {
 	Signature []byte `json:"sig"`
 }
 
+type Query struct{ Event EventQuery }
+
 type Repository struct{ Event EventRepository }
 
 type Service struct{ Event EventService }
