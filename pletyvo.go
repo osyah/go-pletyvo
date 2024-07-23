@@ -32,6 +32,12 @@ type QueryOption struct {
 	Before uuid.UUID
 }
 
+func (qo *QueryOption) Prepare() {
+	if qo.Limit < 1 || qo.Limit > 50 {
+		qo.Limit = 25
+	}
+}
+
 func (qo QueryOption) String() string {
 	var (
 		buf   strings.Builder
