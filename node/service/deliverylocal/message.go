@@ -1,7 +1,7 @@
 // Copyright (c) 2024 Osyah
 // SPDX-License-Identifier: MIT
 
-package delivery
+package deliverylocal
 
 import (
 	"context"
