@@ -3,7 +3,13 @@
 
 package dapp
 
+import "context"
+
 const Protocol = 0
+
+type Handler interface {
+	Handle(context.Context, *Event) error
+}
 
 type AuthHeader struct {
 	Schema    byte   `json:"sch"`
