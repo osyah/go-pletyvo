@@ -1,4 +1,4 @@
 github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
 github.com/google/uuid v1.6.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
-github.com/osyah/hryzun v0.0.0-20240502110742-a9c51ca6d5b4 h1:l4AcsMgxIvWTgfIXLTnqvPqGm/LSC3rpkIbHzthUIZg=
-github.com/osyah/hryzun v0.0.0-20240502110742-a9c51ca6d5b4/go.mod h1:e2YB2GEjAidDbwULtu+vVGfWrcVhEQHCcPIuGlPZD2c=
+github.com/osyah/hryzun v0.0.1 h1:a4GTMO9wJghVTDAnSvkwrCaDSmYUUEIXD2DM1oc+Er4=
+github.com/osyah/hryzun v0.0.1/go.mod h1:e2YB2GEjAidDbwULtu+vVGfWrcVhEQHCcPIuGlPZD2c=
