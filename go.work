@@ -5,6 +5,7 @@ use (
 	./client
 	./node
 	./protocol/dapp/crypto
+	./repository
 	./repository/dapppebble
 	./repository/deliverypebble
 	./repository/registrypebble
