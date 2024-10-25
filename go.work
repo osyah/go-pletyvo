@@ -9,4 +9,6 @@ use (
 	./repository/dapppebble
 	./repository/deliverypebble
 	./repository/registrypebble
+	./store
+	./store/pebble
 )
