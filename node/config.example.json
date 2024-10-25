@@ -1,0 +1,38 @@
+{
+  "node": {
+    "store": {
+      "pebble": {"dirname": ".pletyvo/store/pebble"}
+    },
+    "protocol": {
+      "registry": {"repos": "registry_pebble"},
+      "delivery": {"repos": "delivery_pebble"}
+    },
+    "relay": {
+      "local_doer": {"repos": "dapp_pebble"}
+    },
+    "service": {
+      "dapp_local": {"relay": "local_doer", "repos": "dapp_pebble"},
+      "registry_local": {"repos": "registry_pebble"},
+      "delivery_local": {"repos": "delivery_pebble"}
+    },
+    "transport": {
+      "http_api": {
+        "server": {
+          "address": "localhost:8000",
+          "fiber": {
+            "prefork": false,
+            "body_limit": 1024,
+            "concurrency": 1024,
+            "app_name": "Pletyvo Node"
+          }
+        },
+        "cors": {
+          "origins": [],
+          "methods": ["GET", "POST"],
+          "headers": ["Network"],
+          "credentials": false
+        }
+      }
+    }
+  }
+}
