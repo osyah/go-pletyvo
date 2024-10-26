@@ -49,6 +49,10 @@ func (e Engine) Get(ctx context.Context, endpoint string, value any) error {
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode != http.StatusOK {
+		return ErrorHandler(resp)
+	}
+
 	return json.NewDecoder(resp.Body).Decode(value)
 }
 
@@ -78,6 +82,10 @@ func (e Engine) Post(ctx context.Context, endpoint string, body, value any) erro
 		return err
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return ErrorHandler(resp)
+	}
 
 	return json.NewDecoder(resp.Body).Decode(value)
 }
