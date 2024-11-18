@@ -13,13 +13,15 @@ type Signer interface {
 	Schema() byte
 	Sign([]byte) []byte
 	Public() []byte
-	Address() dapp.Address
+	Address() dapp.Hash
 	Auth([]byte) dapp.AuthHeader
 }
 
-func NewAddress(schema byte, publicKey []byte) dapp.Address {
-	tmp := []byte{schema}
-	tmp = append(tmp, publicKey...)
+func NewHash(schema byte, data []byte) dapp.Hash {
+	tmp := make([]byte, (len(data) + 1))
 
-	return dapp.Address(blake3.Sum256(tmp))
+	tmp[0] = schema
+	copy(tmp[1:], data)
+
+	return blake3.Sum256(tmp)
 }

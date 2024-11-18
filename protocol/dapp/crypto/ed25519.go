@@ -46,8 +46,8 @@ func (ed ED25519) Public() []byte {
 	return publicKey
 }
 
-func (ed ED25519) Address() dapp.Address {
-	return NewAddress(SchemaED25519, ed.Public())
+func (ed ED25519) Address() dapp.Hash {
+	return NewHash(SchemaED25519, ed.Public())
 }
 
 func (ed ED25519) Auth(msg []byte) dapp.AuthHeader {
