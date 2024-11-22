@@ -17,8 +17,7 @@ type Event struct {
 }
 
 type EventHeader struct {
-	ID     uuid.UUID `json:"id"`
-	Author Address   `json:"author"`
+	ID uuid.UUID `json:"id"`
 }
 
 type EventQuery interface {
@@ -48,8 +47,3 @@ type EventInput struct {
 type EventInputVerifierFunc func(*EventInput) bool
 
 func (ei *EventInput) Verify(f EventInputVerifierFunc) bool { return f(ei) }
-
-type EventBase[T any] struct {
-	*EventHeader
-	Input *T
-}
