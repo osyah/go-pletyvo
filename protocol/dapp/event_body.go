@@ -13,65 +13,105 @@ import (
 )
 
 const (
-	EventTypeSize = 4
+	EventBodyBasic = 1 + iota
+	EventBodyLinked
+	maxEventBodyVersion
 
-	EventBodyJSON = 0
+	JSONDataType = 1
 )
 
-type EventType [EventTypeSize]byte
+var (
+	ErrInvalidEventBodyVersion = status.New(
+		pletyvo.CodeInvalidArgument, "invalid event body version",
+	)
+	ErrInvalidEventBodyDataType = status.New(
+		pletyvo.CodeInvalidArgument, "invalid event body data type",
+	)
+	ErrInvalidEventType = status.New(
+		pletyvo.CodeInvalidArgument, "unsupported event type",
+	)
 
-func NewEventType(event, aggregate, version, protocol byte) EventType {
-	return EventType{event, aggregate, version, protocol}
-}
-
-func (e EventType) Event() byte     { return e[0] }
-func (e EventType) Aggregate() byte { return e[1] }
-func (e EventType) Version() byte   { return e[2] }
-func (e EventType) Protocol() byte  { return e[3] }
-
-var ErrInvalidEventType = status.New(pletyvo.CodeInvalidArgument, "unsupported event type")
+	EventBodyMetaSize = [3]int{EventBodyBasic: 4, EventBodyLinked: 36}
+)
 
 type EventBody []byte
 
-func NewEventBodyJSON(value any, et EventType) EventBody {
-	b, err := json.Marshal(value)
+func NewEventBody(version, dataType byte, eventType uint16, value any) EventBody {
+	if dataType != JSONDataType {
+		panic("go-pletyvo/protocol/dapp: unsupported event body data type")
+	}
+
+	data, err := json.Marshal(value)
 	if err != nil {
 		panic("go-pletyvo/protocol/dapp: " + err.Error())
 	}
 
-	body := make(EventBody, (len(b) + 5))
+	body := make(EventBody, (len(data) + EventBodyMetaSize[version]))
 
-	body.SetVersion(EventBodyJSON)
-	body.SetType(et)
+	body[0] = version
+	body[1] = dataType
+	body[2] = byte(eventType >> 8)
+	body[3] = byte(eventType)
 
-	copy(body[5:], b[:])
+	copy(body[EventBodyMetaSize[version]:], data[:])
 
 	return body
 }
 
 func (eb EventBody) Version() byte { return eb[0] }
 
-func (eb EventBody) SetVersion(version byte) { eb[0] = version }
+func (eb EventBody) DataType() byte { return eb[1] }
 
-func (eb EventBody) Type() EventType {
-	return EventType{eb[1], eb[2], eb[3], eb[4]}
+func (eb EventBody) Type() uint16 {
+	return uint16(eb[3]) | (uint16(eb[2]) << 8)
 }
 
-func (eb EventBody) SetType(et EventType) {
-	eb[1] = et.Event()
-	eb[2] = et.Aggregate()
-	eb[3] = et.Version()
-	eb[4] = et.Protocol()
+func (eb EventBody) Data() []byte {
+	return eb[EventBodyMetaSize[eb.Version()]:]
 }
-
-func (eb EventBody) Data() []byte { return eb[5:] }
-
-func (eb EventBody) VerifyData() bool { return json.Valid(eb[5:]) }
 
 func (eb EventBody) Bytes() []byte { return eb[:] }
 
 func (eb EventBody) String() string {
-	return base64.StdEncoding.EncodeToString(eb[:])
+	return base64.RawURLEncoding.EncodeToString(eb[:])
 }
 
-func (eb EventBody) Unmarshal(v any) error { return json.Unmarshal(eb.Data(), v) }
+func (eb EventBody) MarshalJSON() ([]byte, error) {
+	size := base64.RawURLEncoding.EncodedLen(len(eb)) + 2
+
+	b := make([]byte, size)
+	b[0], b[size-1] = '"', '"'
+
+	base64.RawURLEncoding.Encode(b[1:size-1], eb[:])
+
+	return b, nil
+}
+
+func (eb *EventBody) UnmarshalJSON(b []byte) error {
+	*eb = make(EventBody, base64.RawURLEncoding.DecodedLen((len(b) - 2)))
+	_, err := base64.RawURLEncoding.Decode(*eb, b[1:len(b)-1])
+
+	return err
+}
+
+func (eb EventBody) Unmarshal(v any) error {
+	if eb.Version() >= maxEventBodyVersion {
+		return ErrInvalidEventBodyVersion
+	}
+
+	if eb.DataType() != JSONDataType {
+		return ErrInvalidEventBodyDataType
+	}
+
+	return json.Unmarshal(eb.Data(), v)
+}
+
+func (eb EventBody) Parent() Hash { return Hash(eb[4:36]) }
+
+func (eb EventBody) SetParent(hash Hash) {
+	if eb.Version() != EventBodyLinked {
+		panic("go-pletyvo/protocol/dapp: event body dont support linked version")
+	}
+
+	copy(eb[4:36], hash[:])
+}
