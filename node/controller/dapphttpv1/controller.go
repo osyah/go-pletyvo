@@ -19,5 +19,6 @@ func (c Controller) RegisterRoutes(router fiber.Router) {
 	v1 := router.Group("/v1")
 	{
 		NewEvent(c.service.Event).RegisterRoutes(v1)
+		NewHash(c.service.Hash).RegisterRoutes(v1)
 	}
 }
