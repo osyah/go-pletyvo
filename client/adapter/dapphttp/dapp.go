@@ -9,5 +9,5 @@ import (
 )
 
 func New(engine engine.HTTP) *dapp.Service {
-	return &dapp.Service{Event: NewEvent(engine)}
+	return &dapp.Service{Event: NewEvent(engine), Hash: NewHash(engine)}
 }
