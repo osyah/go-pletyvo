@@ -16,12 +16,12 @@ func NewHash(engine engine.HTTP) *Hash {
 	return &Hash{engine: engine}
 }
 
-func (h Hash) GetByID(ctx context.Context, id dapp.Hash) (*dapp.EventHeader, error) {
-	var header dapp.EventHeader
+func (h Hash) GetByID(ctx context.Context, id dapp.Hash) (*dapp.EventResponse, error) {
+	var response dapp.EventResponse
 
-	if err := h.engine.Get(ctx, ("/dapp/v1/hash/" + id.String()), &header); err != nil {
+	if err := h.engine.Get(ctx, ("/dapp/v1/hash/" + id.String()), &response); err != nil {
 		return nil, err
 	}
 
-	return &header, nil
+	return &response, nil
 }
