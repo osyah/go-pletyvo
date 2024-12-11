@@ -17,7 +17,8 @@ type Event struct {
 }
 
 type EventHeader struct {
-	ID uuid.UUID `json:"id"`
+	ID   uuid.UUID `json:"id"`
+	Hash Hash      `json:"hash"`
 }
 
 type EventQuery interface {
