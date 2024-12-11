@@ -16,11 +16,12 @@ import (
 
 type Event struct {
 	query dapp.EventQuery
+	hash  dapp.HashQuery
 	relay relay.Relay
 }
 
-func NewEvent(query dapp.EventQuery, relay relay.Relay) *Event {
-	return &Event{query: query, relay: relay}
+func NewEvent(repos *dapp.Repository, relay relay.Relay) *Event {
+	return &Event{query: repos.Event, hash: repos.Hash, relay: relay}
 }
 
 func (e Event) Get(ctx context.Context, option *pletyvo.QueryOption) ([]*dapp.Event, error) {
@@ -34,29 +35,29 @@ func (e Event) GetByID(ctx context.Context, id uuid.UUID) (*dapp.Event, error) {
 }
 
 func (e Event) Create(ctx context.Context, input *dapp.EventInput) (*dapp.EventResponse, error) {
-	var (
-		header dapp.EventHeader
-		err    error
-	)
+	header := &dapp.EventHeader{
+		Hash: crypto.NewHash(input.Auth.Schema, input.Auth.Signature),
+	}
 
-	header.ID, err = uuid.NewV7()
-	if err != nil {
-		return nil, pletyvo.CodeInternal
+	response, err := e.hash.GetByID(ctx, header.Hash)
+	if err == nil {
+		return response, nil
 	}
 
 	if !input.Verify(crypto.EventInputVerifier) {
 		return nil, pletyvo.CodeUnauthorized
 	}
 
-	header.Author = crypto.NewAddress(input.Auth.Schema, input.Auth.PublicKey)
-
-	err = e.relay.OnEvent(ctx, &dapp.Event{
-		EventHeader: &header,
-		EventInput:  input,
-	})
+	header.ID, err = uuid.NewV7()
 	if err != nil {
-		return nil, err
+		return nil, pletyvo.CodeInternal
 	}
 
-	return &dapp.EventResponse{ID: header.ID}, nil
+	event := &dapp.Event{EventHeader: header, EventInput: input}
+
+	if err = e.relay.OnEvent(ctx, event); err != nil {
+		return nil, pletyvo.CodeInternal
+	}
+
+	return &dapp.EventResponse{ID: event.ID}, nil
 }
