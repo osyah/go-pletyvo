@@ -16,7 +16,7 @@ type Config struct {
 }
 
 func New(repos *dapp.Repository, relay relay.Relay) *dapp.Service {
-	return &dapp.Service{Event: NewEvent(repos.Event, relay)}
+	return &dapp.Service{Event: NewEvent(repos, relay), Hash: NewHash(repos.Hash)}
 }
 
 func Register(config Config) container.Handler {
