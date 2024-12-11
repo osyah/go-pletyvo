@@ -9,7 +9,7 @@ import (
 	"github.com/osyah/go-pletyvo/node/config"
 	"github.com/osyah/go-pletyvo/node/relay"
 	"github.com/osyah/go-pletyvo/node/service"
-	"github.com/osyah/go-pletyvo/protocol"
+	"github.com/osyah/go-pletyvo/protocol/dapp"
 	"github.com/osyah/go-pletyvo/protocol/delivery"
 	"github.com/osyah/go-pletyvo/protocol/registry"
 	"github.com/osyah/go-pletyvo/repository"
@@ -26,14 +26,17 @@ func InitContainer(base *container.Base, config config.Node) {
 	relay.Register(base, config.Relay)
 	service.Register(base, config.Service)
 
-	base.RegisterHandler("executor", func(base *container.Base) any {
-		return &protocol.Executor{
-			Registry: registry.NewExecutor(
-				container.Get[*registry.Repository](base, config.Protocol.Registry.Repos),
-			),
-			Delivery: delivery.NewExecutor(
-				container.Get[*delivery.Repository](base, config.Protocol.Delivery.Repos),
-			),
-		}
+	base.RegisterHandler("handler", func(base *container.Base) any {
+		handler := dapp.NewHandler()
+
+		registry.NewExecutor(
+			container.Get[*registry.Repository](base, config.Protocol.Registry.Repos),
+		).Register(handler)
+
+		delivery.NewExecutor(
+			container.Get[*delivery.Repository](base, config.Protocol.Delivery.Repos),
+		).Register(handler)
+
+		return handler
 	})
 }
