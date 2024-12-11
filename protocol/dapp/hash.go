@@ -29,12 +29,12 @@ var (
 )
 
 type HashQuery interface {
-	GetByID(context.Context, Hash) (*EventHeader, error)
+	GetByID(context.Context, Hash) (*EventResponse, error)
 }
 
 type HashRepository interface {
 	HashQuery
-	Create(context.Context, Hash, *EventHeader) error
+	Create(context.Context, *EventHeader) error
 }
 
 type HashService interface{ HashQuery }
