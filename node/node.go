@@ -15,7 +15,6 @@ import (
 	"github.com/osyah/go-pletyvo/node/transport/httpapi"
 	"github.com/osyah/go-pletyvo/protocol/dapp"
 	"github.com/osyah/go-pletyvo/protocol/delivery"
-	"github.com/osyah/go-pletyvo/protocol/registry"
 )
 
 func Run(configPath string) {
@@ -30,7 +29,6 @@ func Run(configPath string) {
 
 	server := httpapi.New(cfg.Node.Transport.HTTPAPI, &httpapi.Service{
 		DApp:     container.Get[*dapp.Service](base, "dapp_local"),
-		Registry: container.Get[*registry.Query](base, "registry_local"),
 		Delivery: container.Get[*delivery.Query](base, "delivery_local"),
 	}).Build()
 

@@ -6,13 +6,11 @@ replace (
 	github.com/osyah/go-pletyvo => ../.
 	github.com/osyah/go-pletyvo/repository/dapppebble => ../repository/dapppebble
 	github.com/osyah/go-pletyvo/repository/deliverypebble => ../repository/deliverypebble
-	github.com/osyah/go-pletyvo/repository/registrypebble => ../repository/registrypebble
 )
 
 require (
 	github.com/osyah/go-pletyvo/repository/dapppebble v0.0.0-00010101000000-000000000000
 	github.com/osyah/go-pletyvo/repository/deliverypebble v0.0.0-00010101000000-000000000000
-	github.com/osyah/go-pletyvo/repository/registrypebble v0.0.0-00010101000000-000000000000
 	github.com/osyah/hryzun v0.0.1
 )
 

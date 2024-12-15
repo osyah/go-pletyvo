@@ -9,7 +9,6 @@ import (
 
 	"github.com/osyah/go-pletyvo/node/controller/dapphttpv1"
 	"github.com/osyah/go-pletyvo/node/controller/deliveryhttpv1"
-	"github.com/osyah/go-pletyvo/node/controller/registryhttpv1"
 )
 
 type Builder struct {
@@ -43,10 +42,5 @@ func (b Builder) registerAPIRoutes(router fiber.Router) {
 	delivery := router.Group("/delivery")
 	{
 		deliveryhttpv1.New(b.service.Delivery).RegisterRoutes(delivery)
-	}
-
-	registry := router.Group("/registry")
-	{
-		registryhttpv1.New(b.service.Registry).RegisterRoutes(registry)
 	}
 }

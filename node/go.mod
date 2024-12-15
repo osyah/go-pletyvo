@@ -8,7 +8,6 @@ replace (
 	github.com/osyah/go-pletyvo/repository => ../repository
 	github.com/osyah/go-pletyvo/repository/dapppebble => ../repository/dapppebble
 	github.com/osyah/go-pletyvo/repository/deliverypebble => ../repository/deliverypebble
-	github.com/osyah/go-pletyvo/repository/registrypebble => ../repository/registrypebble
 	github.com/osyah/go-pletyvo/store => ../store
 	github.com/osyah/go-pletyvo/store/pebble => ../store/pebble
 )
@@ -52,7 +51,6 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/osyah/go-pletyvo/repository/dapppebble v0.0.0 // indirect
 	github.com/osyah/go-pletyvo/repository/deliverypebble v0.0.0-00010101000000-000000000000 // indirect
-	github.com/osyah/go-pletyvo/repository/registrypebble v0.0.0-00010101000000-000000000000 // indirect
 	github.com/osyah/go-pletyvo/store/pebble v0.0.0-00010101000000-000000000000 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.12.0 // indirect

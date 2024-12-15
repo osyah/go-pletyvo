@@ -11,7 +11,6 @@ import (
 	"github.com/osyah/go-pletyvo/node/service"
 	"github.com/osyah/go-pletyvo/protocol/dapp"
 	"github.com/osyah/go-pletyvo/protocol/delivery"
-	"github.com/osyah/go-pletyvo/protocol/registry"
 	"github.com/osyah/go-pletyvo/repository"
 	"github.com/osyah/go-pletyvo/store"
 )
@@ -28,10 +27,6 @@ func InitContainer(base *container.Base, config config.Node) {
 
 	base.RegisterHandler("handler", func(base *container.Base) any {
 		handler := dapp.NewHandler()
-
-		registry.NewExecutor(
-			container.Get[*registry.Repository](base, config.Protocol.Registry.Repos),
-		).Register(handler)
 
 		delivery.NewExecutor(
 			container.Get[*delivery.Repository](base, config.Protocol.Delivery.Repos),

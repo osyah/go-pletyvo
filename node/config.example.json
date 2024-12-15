@@ -4,7 +4,6 @@
       "pebble": {"dirname": ".pletyvo/store/pebble"}
     },
     "protocol": {
-      "registry": {"repos": "registry_pebble"},
       "delivery": {"repos": "delivery_pebble"}
     },
     "relay": {
@@ -12,7 +11,6 @@
     },
     "service": {
       "dapp_local": {"relay": "local_doer", "repos": "dapp_pebble"},
-      "registry_local": {"repos": "registry_pebble"},
       "delivery_local": {"repos": "delivery_pebble"}
     },
     "transport": {
