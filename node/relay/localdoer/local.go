@@ -25,7 +25,7 @@ func New(handler *dapp.Handler, repos *dapp.Repository) *Relay {
 	return &Relay{handler: handler, repos: repos.Event, hash: repos.Hash}
 }
 
-func (r Relay) OnEvent(ctx context.Context, event *dapp.Event) error {
+func (r Relay) OnEvent(ctx context.Context, event *dapp.SystemEvent) error {
 	err := r.handler.Handle(ctx, event)
 	if err != nil {
 		return err
