@@ -12,8 +12,15 @@ import (
 )
 
 type Event struct {
+	ID   uuid.UUID  `json:"id"`
+	Body EventBody  `json:"body"`
+	Auth AuthHeader `json:"auth"`
+}
+
+type SystemEvent struct {
 	*EventHeader
 	*EventInput
+	Author Hash
 }
 
 type EventHeader struct {
@@ -28,7 +35,7 @@ type EventQuery interface {
 
 type EventRepository interface {
 	EventQuery
-	Create(context.Context, *Event) error
+	Create(context.Context, *SystemEvent) error
 }
 
 type EventResponse struct {

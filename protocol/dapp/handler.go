@@ -7,7 +7,7 @@ import "context"
 
 const maxEventType = 7
 
-type HandlerFunc func(context.Context, *Event) error
+type HandlerFunc func(context.Context, *SystemEvent) error
 
 type Handler struct{ buf [1][maxEventType]HandlerFunc }
 
@@ -19,7 +19,7 @@ func (h *Handler) Register(eventType uint16, handlerFunc HandlerFunc) {
 	h.buf[byte((eventType >> 8))][byte(eventType)] = handlerFunc
 }
 
-func (h Handler) Handle(ctx context.Context, event *Event) error {
+func (h Handler) Handle(ctx context.Context, event *SystemEvent) error {
 	if event.Body[2] > 0 || event.Body[3] >= maxEventType {
 		return ErrInvalidEventType
 	}
