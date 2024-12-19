@@ -116,7 +116,7 @@ func (e Event) GetByID(ctx context.Context, id uuid.UUID) (*dapp.Event, error) {
 	return &event, nil
 }
 
-func (e Event) Create(ctx context.Context, event *dapp.Event) error {
+func (e Event) Create(ctx context.Context, event *dapp.SystemEvent) error {
 	network, ok := ctx.Value(pletyvo.ContextKeyNetwork).(*uuid.UUID)
 	if !ok {
 		network = &uuid.Nil

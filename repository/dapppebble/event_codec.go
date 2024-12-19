@@ -11,14 +11,13 @@ import (
 	"github.com/osyah/go-pletyvo/protocol/dapp"
 )
 
-func (Event) marshal(event *dapp.Event) []byte {
+func (Event) marshal(event *dapp.SystemEvent) []byte {
 	m := mp.Get()
 
 	mm := m.MessageMarshaler()
-	mm.AppendBytes(1, event.Author[:])
-	mm.AppendBytes(2, event.Body)
+	mm.AppendBytes(1, event.Body)
 
-	am := mm.AppendMessage(3)
+	am := mm.AppendMessage(2)
 	am.AppendUint32(1, uint32(event.Auth.Schema))
 	am.AppendBytes(2, event.Auth.PublicKey)
 	am.AppendBytes(3, event.Auth.Signature)
@@ -33,9 +32,6 @@ func (Event) marshal(event *dapp.Event) []byte {
 func (e Event) unmarshal(src []byte, event *dapp.Event) (err error) {
 	var fc easyproto.FieldContext
 
-	event.EventHeader = &dapp.EventHeader{}
-	event.EventInput = &dapp.EventInput{}
-
 	for len(src) > 0 {
 		src, err = fc.NextField(src)
 		if err != nil {
@@ -47,16 +43,6 @@ func (e Event) unmarshal(src []byte, event *dapp.Event) (err error) {
 
 		switch fc.FieldNum {
 		case 1:
-			author, ok := fc.Bytes()
-			if !ok {
-				return status.New(
-					pletyvo.CodeInternal,
-					"go-pletyvo/repository/dapppebble: cannot read author",
-				)
-			}
-
-			event.Author = dapp.Address(author)
-		case 2:
 			body, ok := fc.Bytes()
 			if !ok {
 				return status.New(
@@ -66,7 +52,7 @@ func (e Event) unmarshal(src []byte, event *dapp.Event) (err error) {
 			}
 
 			event.Body = append(event.Body, body...)
-		case 3:
+		case 2:
 			data, ok := fc.MessageData()
 			if !ok {
 				return status.New(
@@ -75,13 +61,9 @@ func (e Event) unmarshal(src []byte, event *dapp.Event) (err error) {
 				)
 			}
 
-			var auth dapp.AuthHeader
-
-			if err := e.unmarshalAuth(data, &auth); err != nil {
+			if err := e.unmarshalAuth(data, &event.Auth); err != nil {
 				return err
 			}
-
-			event.Auth = auth
 		}
 	}
 
