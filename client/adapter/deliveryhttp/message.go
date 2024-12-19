@@ -56,19 +56,23 @@ func (m Message) GetByID(ctx context.Context, ch uuid.UUID, id uuid.UUID) (*deli
 }
 
 func (m Message) Create(ctx context.Context, input *delivery.MessageCreateInput) (*dapp.EventResponse, error) {
-	body := dapp.NewEventBodyJSON(input, delivery.MessageCreateEventType)
+	body := dapp.NewEventBody(
+		dapp.EventBodyBasic, dapp.JSONDataType,
+		delivery.MessageCreateEventType, input,
+	)
 
 	return m.event.Create(ctx, &dapp.EventInput{
-		Body: body,
-		Auth: m.signer.Auth(body),
+		Body: body, Auth: m.signer.Auth(body),
 	})
 }
 
 func (m Message) Update(ctx context.Context, input *delivery.MessageUpdateInput) (*dapp.EventResponse, error) {
-	body := dapp.NewEventBodyJSON(input, delivery.MessageUpdateEventType)
+	body := dapp.NewEventBody(
+		dapp.EventBodyBasic, dapp.JSONDataType,
+		delivery.MessageUpdateEventType, input,
+	)
 
 	return m.event.Create(ctx, &dapp.EventInput{
-		Body: body,
-		Auth: m.signer.Auth(body),
+		Body: body, Auth: m.signer.Auth(body),
 	})
 }
