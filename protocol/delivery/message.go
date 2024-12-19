@@ -13,25 +13,21 @@ import (
 	"github.com/osyah/go-pletyvo/protocol/dapp"
 )
 
-const MessageAggregate = 2
-
 const (
-	MessageCreate = iota
-	MessageUpdate
-)
-
-var (
-	MessageCreateEventType = dapp.NewEventType(MessageCreate, MessageAggregate, Version, Protocol)
-	MessageUpdateEventType = dapp.NewEventType(MessageUpdate, MessageAggregate, Version, Protocol)
+	MessageCreateEventType = 5
+	MessageUpdateEventType = 6
 )
 
 type Message struct {
-	*dapp.EventHeader
-	*MessageInput
+	ID      uuid.UUID `json:"id"`
+	Hash    dapp.Hash `json:"hash"`
+	Author  dapp.Hash `json:"author"`
+	Channel uuid.UUID `json:"channel"`
+	Content string    `json:"content"`
 }
 
 type MessageInput struct {
-	Channel uuid.UUID `json:"channel"`
+	Channel dapp.Hash `json:"channel"`
 	Content string    `json:"content"`
 }
 
@@ -56,7 +52,7 @@ func (mci MessageCreateInput) Validate() error {
 
 type MessageUpdateInput struct {
 	*MessageInput
-	Message uuid.UUID `json:"message"`
+	Message dapp.Hash `json:"message"`
 }
 
 func (mui MessageUpdateInput) Validate() error {
@@ -65,8 +61,8 @@ func (mui MessageUpdateInput) Validate() error {
 
 type MessageRepository interface {
 	MessageQuery
-	Create(context.Context, *Message) error
-	Update(context.Context, *MessageUpdateInput) error
+	Create(context.Context, *dapp.SystemEvent, *MessageInput) error
+	Update(context.Context, *dapp.SystemEvent, *MessageUpdateInput) error
 }
 
 type MessageService interface {

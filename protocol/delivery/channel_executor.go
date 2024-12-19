@@ -6,7 +6,6 @@ package delivery
 import (
 	"context"
 
-	"github.com/osyah/go-pletyvo"
 	"github.com/osyah/go-pletyvo/protocol/dapp"
 )
 
@@ -16,30 +15,36 @@ func NewChannelExecutor(repos ChannelRepository) *ChannelExecutor {
 	return &ChannelExecutor{repos: repos}
 }
 
-func (ce ChannelExecutor) Create(ctx context.Context, base dapp.EventBase[ChannelCreateInput]) error {
-	if err := base.Input.Validate(); err != nil {
-		return err
-	}
-
-	return ce.repos.Create(ctx, &Channel{
-		EventHeader:  base.EventHeader,
-		ChannelInput: base.Input.ChannelInput,
-	})
+func (ce ChannelExecutor) Register(handler *dapp.Handler) {
+	handler.Register(ChannelCreateEventType, ce.Create)
+	handler.Register(ChannelUpdateEventType, ce.Update)
 }
 
-func (ce ChannelExecutor) Update(ctx context.Context, base dapp.EventBase[ChannelUpdateInput]) error {
-	if err := base.Input.Validate(); err != nil {
+func (ce ChannelExecutor) Create(ctx context.Context, event *dapp.SystemEvent) error {
+	var input ChannelInput
+
+	if err := event.Body.Unmarshal(&input); err != nil {
 		return err
 	}
 
-	channel, err := ce.repos.GetByID(ctx, base.Input.Channel)
+	if err := input.Validate(); err != nil {
+		return err
+	}
+
+	return ce.repos.Create(ctx, event, &input)
+}
+
+func (ce ChannelExecutor) Update(ctx context.Context, event *dapp.SystemEvent) error {
+	var input ChannelUpdateInput
+
+	err := event.Body.Unmarshal(&input)
 	if err != nil {
 		return err
 	}
 
-	if channel.Author != base.Author {
-		return pletyvo.CodePermissionDenied
+	if err = input.Validate(); err != nil {
+		return err
 	}
 
-	return ce.repos.Update(ctx, base.Input)
+	return ce.repos.Update(ctx, event, &input)
 }

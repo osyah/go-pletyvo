@@ -13,21 +13,16 @@ import (
 	"github.com/osyah/go-pletyvo/protocol/dapp"
 )
 
-const ChannelAggregate = 1
-
 const (
-	ChannelCreate = iota
-	ChannelUpdate
-)
-
-var (
-	ChannelCreateEventType = dapp.NewEventType(ChannelCreate, ChannelAggregate, Version, Protocol)
-	ChannelUpdateEventType = dapp.NewEventType(ChannelUpdate, ChannelAggregate, Version, Protocol)
+	ChannelCreateEventType = 3
+	ChannelUpdateEventType = 4
 )
 
 type Channel struct {
-	*dapp.EventHeader
-	*ChannelInput
+	ID     uuid.UUID `json:"id"`
+	Hash   dapp.Hash `json:"hash"`
+	Author dapp.Hash `json:"author"`
+	Name   string    `json:"name"`
 }
 
 type ChannelInput struct {
@@ -54,7 +49,7 @@ func (cci ChannelCreateInput) Validate() error {
 
 type ChannelUpdateInput struct {
 	*ChannelInput
-	Channel uuid.UUID `json:"channel"`
+	Channel dapp.Hash `json:"channel"`
 }
 
 func (cui ChannelUpdateInput) Validate() error {
@@ -63,8 +58,8 @@ func (cui ChannelUpdateInput) Validate() error {
 
 type ChannelRepository interface {
 	ChannelQuery
-	Create(context.Context, *Channel) error
-	Update(context.Context, *ChannelUpdateInput) error
+	Create(context.Context, *dapp.SystemEvent, *ChannelInput) error
+	Update(context.Context, *dapp.SystemEvent, *ChannelUpdateInput) error
 }
 
 type ChannelService interface {

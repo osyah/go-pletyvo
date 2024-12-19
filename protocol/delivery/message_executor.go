@@ -6,7 +6,6 @@ package delivery
 import (
 	"context"
 
-	"github.com/osyah/go-pletyvo"
 	"github.com/osyah/go-pletyvo/protocol/dapp"
 )
 
@@ -16,30 +15,35 @@ func NewMessageExecutor(repos MessageRepository) *MessageExecutor {
 	return &MessageExecutor{repos: repos}
 }
 
-func (me MessageExecutor) Create(ctx context.Context, base dapp.EventBase[MessageCreateInput]) error {
-	if err := base.Input.Validate(); err != nil {
-		return err
-	}
-
-	return me.repos.Create(ctx, &Message{
-		EventHeader:  base.EventHeader,
-		MessageInput: base.Input.MessageInput,
-	})
+func (me MessageExecutor) Register(handler *dapp.Handler) {
+	handler.Register(MessageCreateEventType, me.Create)
+	handler.Register(MessageUpdateEventType, me.Update)
 }
 
-func (me MessageExecutor) Update(ctx context.Context, base dapp.EventBase[MessageUpdateInput]) error {
-	if err := base.Input.Validate(); err != nil {
+func (me MessageExecutor) Create(ctx context.Context, event *dapp.SystemEvent) error {
+	var input MessageInput
+
+	if err := event.Body.Unmarshal(&input); err != nil {
 		return err
 	}
 
-	message, err := me.repos.GetByID(ctx, base.Input.Channel, base.Input.Message)
-	if err != nil {
+	if err := input.Validate(); err != nil {
 		return err
 	}
 
-	if message.Author != base.Author {
-		return pletyvo.CodePermissionDenied
+	return me.repos.Create(ctx, event, &input)
+}
+
+func (me MessageExecutor) Update(ctx context.Context, event *dapp.SystemEvent) error {
+	var input MessageUpdateInput
+
+	if err := event.Body.Unmarshal(&input); err != nil {
+		return err
 	}
 
-	return me.repos.Update(ctx, base.Input)
+	if err := input.Validate(); err != nil {
+		return err
+	}
+
+	return me.repos.Update(ctx, event, &input)
 }

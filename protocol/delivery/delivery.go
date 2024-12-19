@@ -3,10 +3,7 @@
 
 package delivery
 
-const (
-	Protocol = 2
-	Version  = 0
-)
+import "github.com/osyah/go-pletyvo/protocol/dapp"
 
 type Query struct {
 	Channel ChannelQuery
@@ -33,4 +30,9 @@ func NewExecutor(repos *Repository) *Executor {
 		Channel: NewChannelExecutor(repos.Channel),
 		Message: NewMessageExecutor(repos.Message),
 	}
+}
+
+func (e Executor) Register(handler *dapp.Handler) {
+	e.Channel.Register(handler)
+	e.Message.Register(handler)
 }
