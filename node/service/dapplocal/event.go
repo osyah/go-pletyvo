@@ -53,11 +53,13 @@ func (e Event) Create(ctx context.Context, input *dapp.EventInput) (*dapp.EventR
 		return nil, pletyvo.CodeInternal
 	}
 
-	event := &dapp.Event{EventHeader: header, EventInput: input}
-
-	if err = e.relay.OnEvent(ctx, event); err != nil {
+	if err = e.relay.OnEvent(ctx, &dapp.SystemEvent{
+		EventHeader: header,
+		EventInput:  input,
+		Author:      crypto.NewHash(input.Auth.Schema, input.Auth.PublicKey),
+	}); err != nil {
 		return nil, pletyvo.CodeInternal
 	}
 
-	return &dapp.EventResponse{ID: event.ID}, nil
+	return &dapp.EventResponse{ID: header.ID}, nil
 }
