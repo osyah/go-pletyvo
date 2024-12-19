@@ -13,7 +13,7 @@ import (
 )
 
 type Relay interface {
-	OnEvent(context.Context, *dapp.Event) error
+	OnEvent(context.Context, *dapp.SystemEvent) error
 }
 
 func Register(base *container.Base, config Config) {
