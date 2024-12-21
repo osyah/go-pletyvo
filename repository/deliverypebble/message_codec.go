@@ -14,12 +14,13 @@ import (
 	"github.com/osyah/go-pletyvo/protocol/delivery"
 )
 
-func (m Message) marshal(message *delivery.Message) []byte {
+func (m Message) marshal(event *dapp.SystemEvent, input *delivery.MessageInput) []byte {
 	mr := mp.Get()
 
 	mm := mr.MessageMarshaler()
-	mm.AppendBytes(1, message.Author[:])
-	mm.AppendString(2, message.Content)
+	mm.AppendBytes(1, event.Hash[:])
+	mm.AppendBytes(2, event.Author[:])
+	mm.AppendString(3, input.Content)
 
 	dst := mr.Marshal(nil)
 
@@ -30,9 +31,6 @@ func (m Message) marshal(message *delivery.Message) []byte {
 
 func (m Message) unmarshal(src []byte, message *delivery.Message) (err error) {
 	var fc easyproto.FieldContext
-
-	message.EventHeader = &dapp.EventHeader{}
-	message.MessageInput = &delivery.MessageInput{}
 
 	for len(src) > 0 {
 		src, err = fc.NextField(src)
@@ -45,6 +43,16 @@ func (m Message) unmarshal(src []byte, message *delivery.Message) (err error) {
 
 		switch fc.FieldNum {
 		case 1:
+			hash, ok := fc.Bytes()
+			if !ok {
+				return status.New(
+					pletyvo.CodeInternal,
+					"go-pletyvo/repository/deliverypebble: cannot read hash",
+				)
+			}
+
+			message.Hash = dapp.Hash(hash)
+		case 2:
 			author, ok := fc.Bytes()
 			if !ok {
 				return status.New(
@@ -53,8 +61,8 @@ func (m Message) unmarshal(src []byte, message *delivery.Message) (err error) {
 				)
 			}
 
-			message.Author = dapp.Address(author)
-		case 2:
+			message.Author = dapp.Hash(author)
+		case 3:
 			content, ok := fc.String()
 			if !ok {
 				return status.New(

@@ -10,6 +10,7 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/osyah/go-pletyvo"
+	"github.com/osyah/go-pletyvo/protocol/dapp"
 	"github.com/osyah/go-pletyvo/protocol/delivery"
 )
 
@@ -21,7 +22,7 @@ func NewChannel(db *pebble.DB) *Channel {
 
 func (Channel) key(ns, id *uuid.UUID) []byte {
 	key := make([]byte, 33)
-	key[0] = delivery.Protocol
+	key[0] = 0 // TODO: use new format
 
 	copy(key[1:], ns[:])
 	copy(key[17:], id[:])
@@ -52,22 +53,22 @@ func (c Channel) GetByID(ctx context.Context, id uuid.UUID) (*delivery.Channel, 
 	return &channel, nil
 }
 
-func (c Channel) Create(ctx context.Context, channel *delivery.Channel) error {
+func (c Channel) Create(ctx context.Context, event *dapp.SystemEvent, input *delivery.ChannelInput) error {
 	network, ok := ctx.Value(pletyvo.ContextKeyNetwork).(*uuid.UUID)
 	if !ok {
 		network = &uuid.Nil
 	}
 
-	return c.db.Set(c.key(network, &channel.ID), c.marshal(channel), pebble.Sync)
+	return c.db.Set(c.key(network, &event.ID), c.marshal(event, input), pebble.Sync)
 }
 
-func (c Channel) Update(ctx context.Context, input *delivery.ChannelUpdateInput) error {
+func (c Channel) Update(ctx context.Context, event *dapp.SystemEvent, input *delivery.ChannelUpdateInput) error {
 	network, ok := ctx.Value(pletyvo.ContextKeyNetwork).(*uuid.UUID)
 	if !ok {
 		network = &uuid.Nil
 	}
 
-	key := c.key(network, &input.Channel)
+	key := c.key(network, nil) // TODO: use new format
 
 	b, closer, err := c.db.Get(key)
 	if err != nil {
@@ -81,7 +82,13 @@ func (c Channel) Update(ctx context.Context, input *delivery.ChannelUpdateInput)
 		return err
 	}
 
-	channel.Name = input.Name
+	if channel.Hash != input.Channel {
+		return pletyvo.CodeConflict
+	}
 
-	return c.db.Set(key, c.marshal(&channel), pebble.Sync)
+	if channel.Author != event.Author {
+		return pletyvo.CodePermissionDenied
+	}
+
+	return c.db.Set(key, c.marshal(event, input.ChannelInput), pebble.Sync)
 }
