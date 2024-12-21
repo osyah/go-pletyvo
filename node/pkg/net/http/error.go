@@ -38,6 +38,8 @@ func WrapStatus(code status.Code) int {
 		return fiber.StatusBadRequest
 	case pletyvo.CodeUnauthorized:
 		return fiber.StatusUnauthorized
+	case pletyvo.CodeConflict:
+		return fiber.StatusConflict
 	default:
 		return fiber.StatusBadRequest
 	}
