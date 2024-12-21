@@ -38,6 +38,8 @@ func WrapStatus(status int) status.Code {
 		return pletyvo.CodeInvalidArgument
 	case http.StatusUnauthorized:
 		return pletyvo.CodeUnauthorized
+	case http.StatusConflict:
+		return pletyvo.CodeConflict
 	default:
 		return pletyvo.CodeInternal
 	}
