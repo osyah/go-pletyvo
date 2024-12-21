@@ -23,6 +23,7 @@ const (
 	CodePermissionDenied
 	CodeInvalidArgument
 	CodeUnauthorized
+	CodeConflict
 )
 
 type QueryOption struct {
