@@ -1,7 +1,7 @@
 // Copyright (c) 2024 Osyah
 // SPDX-License-Identifier: MIT
 
-package deliverypebble
+package pebble
 
 import (
 	"strings"
@@ -14,7 +14,7 @@ import (
 	"github.com/osyah/go-pletyvo/protocol/delivery"
 )
 
-func (m Message) marshal(event *dapp.SystemEvent, input *delivery.MessageInput) []byte {
+func (DeliveryMessage) marshal(event *dapp.SystemEvent, input *delivery.MessageInput) []byte {
 	mr := mp.Get()
 
 	mm := mr.MessageMarshaler()
@@ -29,7 +29,7 @@ func (m Message) marshal(event *dapp.SystemEvent, input *delivery.MessageInput) 
 	return dst
 }
 
-func (m Message) unmarshal(src []byte, message *delivery.Message) (err error) {
+func (DeliveryMessage) unmarshal(src []byte, message *delivery.Message) (err error) {
 	var fc easyproto.FieldContext
 
 	for len(src) > 0 {
@@ -37,7 +37,7 @@ func (m Message) unmarshal(src []byte, message *delivery.Message) (err error) {
 		if err != nil {
 			return status.New(
 				pletyvo.CodeInternal,
-				"go-pletyvo/repository/deliverypebble: cannot read next field",
+				"go-pletyvo/store/pebble: cannot read next DeliveryMessage field",
 			)
 		}
 
@@ -47,7 +47,7 @@ func (m Message) unmarshal(src []byte, message *delivery.Message) (err error) {
 			if !ok {
 				return status.New(
 					pletyvo.CodeInternal,
-					"go-pletyvo/repository/deliverypebble: cannot read hash",
+					"go-pletyvo/store/pebble: cannot read DeliveryMessage hash",
 				)
 			}
 
@@ -57,7 +57,7 @@ func (m Message) unmarshal(src []byte, message *delivery.Message) (err error) {
 			if !ok {
 				return status.New(
 					pletyvo.CodeInternal,
-					"go-pletyvo/repository/deliverypebble: cannot read author",
+					"go-pletyvo/store/pebble: cannot read DeliveryMessage author",
 				)
 			}
 
@@ -67,7 +67,7 @@ func (m Message) unmarshal(src []byte, message *delivery.Message) (err error) {
 			if !ok {
 				return status.New(
 					pletyvo.CodeInternal,
-					"go-pletyvo/repository/deliverypebble: cannot read content",
+					"go-pletyvo/store/pebble: cannot read DeliveryMessage content",
 				)
 			}
 

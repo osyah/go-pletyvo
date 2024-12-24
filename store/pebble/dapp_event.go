@@ -1,7 +1,7 @@
 // Copyright (c) 2024 Osyah
 // SPDX-License-Identifier: MIT
 
-package dapppebble
+package pebble
 
 import (
 	"context"
@@ -13,13 +13,13 @@ import (
 	"github.com/osyah/go-pletyvo/protocol/dapp"
 )
 
-type Event struct{ db *pebble.DB }
+type DAppEvent struct{ db *pebble.DB }
 
-func NewEvent(db *pebble.DB) *Event {
-	return &Event{db: db}
+func NewDAppEvent(db *pebble.DB) *DAppEvent {
+	return &DAppEvent{db: db}
 }
 
-func (Event) key(ns, id *uuid.UUID, sufix byte) []byte {
+func (DAppEvent) key(ns, id *uuid.UUID, sufix byte) []byte {
 	var key []byte
 
 	if id.Version() != 0 {
@@ -30,13 +30,13 @@ func (Event) key(ns, id *uuid.UUID, sufix byte) []byte {
 		key[17] = sufix
 	}
 
-	key[0] = dapp.Protocol
+	key[0] = 0 // TODO: use new format
 	copy(key[1:], ns[:])
 
 	return key
 }
 
-func (e Event) Get(ctx context.Context, option *pletyvo.QueryOption) ([]*dapp.Event, error) {
+func (dae DAppEvent) Get(ctx context.Context, option *pletyvo.QueryOption) ([]*dapp.Event, error) {
 	network, ok := ctx.Value(pletyvo.ContextKeyNetwork).(*uuid.UUID)
 	if !ok {
 		network = &uuid.Nil
@@ -44,9 +44,9 @@ func (e Event) Get(ctx context.Context, option *pletyvo.QueryOption) ([]*dapp.Ev
 
 	events := make([]*dapp.Event, 0, option.Limit)
 
-	iter, err := e.db.NewIterWithContext(ctx, &pebble.IterOptions{
-		LowerBound: e.key(network, &option.After, 0),
-		UpperBound: e.key(network, &option.Before, 255),
+	iter, err := dae.db.NewIterWithContext(ctx, &pebble.IterOptions{
+		LowerBound: dae.key(network, &option.After, 0),
+		UpperBound: dae.key(network, &option.Before, 255),
 	})
 	if err != nil {
 		return nil, err
@@ -78,7 +78,7 @@ func (e Event) Get(ctx context.Context, option *pletyvo.QueryOption) ([]*dapp.Ev
 	for i := 0; i < option.Limit; i++ {
 		var event dapp.Event
 
-		if err := e.unmarshal(iter.Value(), &event); err != nil {
+		if err := dae.unmarshal(iter.Value(), &event); err != nil {
 			return nil, err
 		}
 
@@ -93,13 +93,13 @@ func (e Event) Get(ctx context.Context, option *pletyvo.QueryOption) ([]*dapp.Ev
 	return events, nil
 }
 
-func (e Event) GetByID(ctx context.Context, id uuid.UUID) (*dapp.Event, error) {
+func (dae DAppEvent) GetByID(ctx context.Context, id uuid.UUID) (*dapp.Event, error) {
 	network, ok := ctx.Value(pletyvo.ContextKeyNetwork).(*uuid.UUID)
 	if !ok {
 		network = &uuid.Nil
 	}
 
-	b, closer, err := e.db.Get(e.key(network, &id, 0))
+	b, closer, err := dae.db.Get(dae.key(network, &id, 0))
 	if err != nil {
 		return nil, err
 	}
@@ -107,7 +107,7 @@ func (e Event) GetByID(ctx context.Context, id uuid.UUID) (*dapp.Event, error) {
 
 	var event dapp.Event
 
-	if err := e.unmarshal(b, &event); err != nil {
+	if err := dae.unmarshal(b, &event); err != nil {
 		return nil, err
 	}
 
@@ -116,11 +116,11 @@ func (e Event) GetByID(ctx context.Context, id uuid.UUID) (*dapp.Event, error) {
 	return &event, nil
 }
 
-func (e Event) Create(ctx context.Context, event *dapp.SystemEvent) error {
+func (dae DAppEvent) Create(ctx context.Context, event *dapp.SystemEvent) error {
 	network, ok := ctx.Value(pletyvo.ContextKeyNetwork).(*uuid.UUID)
 	if !ok {
 		network = &uuid.Nil
 	}
 
-	return e.db.Set(e.key(network, &event.ID, 0), e.marshal(event), pebble.Sync)
+	return dae.db.Set(dae.key(network, &event.ID, 0), dae.marshal(event), pebble.Sync)
 }

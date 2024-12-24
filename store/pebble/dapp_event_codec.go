@@ -1,7 +1,7 @@
 // Copyright (c) 2024 Osyah
 // SPDX-License-Identifier: MIT
 
-package dapppebble
+package pebble
 
 import (
 	"github.com/VictoriaMetrics/easyproto"
@@ -11,7 +11,7 @@ import (
 	"github.com/osyah/go-pletyvo/protocol/dapp"
 )
 
-func (Event) marshal(event *dapp.SystemEvent) []byte {
+func (DAppEvent) marshal(event *dapp.SystemEvent) []byte {
 	m := mp.Get()
 
 	mm := m.MessageMarshaler()
@@ -29,7 +29,7 @@ func (Event) marshal(event *dapp.SystemEvent) []byte {
 	return dst
 }
 
-func (e Event) unmarshal(src []byte, event *dapp.Event) (err error) {
+func (dae DAppEvent) unmarshal(src []byte, event *dapp.Event) (err error) {
 	var fc easyproto.FieldContext
 
 	for len(src) > 0 {
@@ -37,7 +37,7 @@ func (e Event) unmarshal(src []byte, event *dapp.Event) (err error) {
 		if err != nil {
 			return status.New(
 				pletyvo.CodeInternal,
-				"go-pletyvo/repository/dapppebble: cannot read next field",
+				"go-pletyvo/store/pebble: cannot read next DAppEvent field",
 			)
 		}
 
@@ -47,7 +47,7 @@ func (e Event) unmarshal(src []byte, event *dapp.Event) (err error) {
 			if !ok {
 				return status.New(
 					pletyvo.CodeInternal,
-					"go-pletyvo/repository/dapppebble: cannot read body",
+					"go-pletyvo/store/pebble: cannot read DAppEvent body",
 				)
 			}
 
@@ -57,11 +57,11 @@ func (e Event) unmarshal(src []byte, event *dapp.Event) (err error) {
 			if !ok {
 				return status.New(
 					pletyvo.CodeInternal,
-					"go-pletyvo/repository/dapppebble: cannot read auth",
+					"go-pletyvo/store/pebble: cannot read DAppEvent auth",
 				)
 			}
 
-			if err := e.unmarshalAuth(data, &event.Auth); err != nil {
+			if err := dae.unmarshalAuth(data, &event.Auth); err != nil {
 				return err
 			}
 		}
@@ -70,7 +70,7 @@ func (e Event) unmarshal(src []byte, event *dapp.Event) (err error) {
 	return nil
 }
 
-func (e Event) unmarshalAuth(src []byte, auth *dapp.AuthHeader) (err error) {
+func (DAppEvent) unmarshalAuth(src []byte, auth *dapp.AuthHeader) (err error) {
 	var fc easyproto.FieldContext
 
 	for len(src) > 0 {
@@ -78,7 +78,7 @@ func (e Event) unmarshalAuth(src []byte, auth *dapp.AuthHeader) (err error) {
 		if err != nil {
 			return status.New(
 				pletyvo.CodeInternal,
-				"go-pletyvo/repository/dapppebble: cannot read next auth field",
+				"go-pletyvo/store/pebble: cannot read next DAppEvent auth field",
 			)
 		}
 
@@ -88,7 +88,7 @@ func (e Event) unmarshalAuth(src []byte, auth *dapp.AuthHeader) (err error) {
 			if !ok {
 				return status.New(
 					pletyvo.CodeInternal,
-					"go-pletyvo/repository/dapppebble: cannot read auth.schema",
+					"go-pletyvo/store/pebble: cannot read DAppEvent auth.schema",
 				)
 			}
 
@@ -98,7 +98,7 @@ func (e Event) unmarshalAuth(src []byte, auth *dapp.AuthHeader) (err error) {
 			if !ok {
 				return status.New(
 					pletyvo.CodeInternal,
-					"go-pletyvo/repository/dapppebble: cannot read auth.public_key",
+					"go-pletyvo/store/dapppebble: cannot read DAppEvent auth.public_key",
 				)
 			}
 
@@ -108,7 +108,7 @@ func (e Event) unmarshalAuth(src []byte, auth *dapp.AuthHeader) (err error) {
 			if !ok {
 				return status.New(
 					pletyvo.CodeInternal,
-					"go-pletyvo/repository/dapppebble: cannot read auth.signature",
+					"go-pletyvo/store/pebble: cannot read DAppEvent auth.signature",
 				)
 			}
 

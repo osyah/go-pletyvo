@@ -1,7 +1,7 @@
 // Copyright (c) 2024 Osyah
 // SPDX-License-Identifier: MIT
 
-package deliverypebble
+package pebble
 
 import (
 	"context"
@@ -14,13 +14,13 @@ import (
 	"github.com/osyah/go-pletyvo/protocol/delivery"
 )
 
-type Channel struct{ db *pebble.DB }
+type DeliveryChannel struct{ db *pebble.DB }
 
-func NewChannel(db *pebble.DB) *Channel {
-	return &Channel{db: db}
+func NewDeliveryChannel(db *pebble.DB) *DeliveryChannel {
+	return &DeliveryChannel{db: db}
 }
 
-func (Channel) key(ns, id *uuid.UUID) []byte {
+func (DeliveryChannel) key(ns, id *uuid.UUID) []byte {
 	key := make([]byte, 33)
 	key[0] = 0 // TODO: use new format
 
@@ -30,13 +30,13 @@ func (Channel) key(ns, id *uuid.UUID) []byte {
 	return key
 }
 
-func (c Channel) GetByID(ctx context.Context, id uuid.UUID) (*delivery.Channel, error) {
+func (dc DeliveryChannel) GetByID(ctx context.Context, id uuid.UUID) (*delivery.Channel, error) {
 	network, ok := ctx.Value(pletyvo.ContextKeyNetwork).(*uuid.UUID)
 	if !ok {
 		network = &uuid.Nil
 	}
 
-	b, closer, err := c.db.Get(c.key(network, &id))
+	b, closer, err := dc.db.Get(dc.key(network, &id))
 	if err != nil {
 		return nil, err
 	}
@@ -44,7 +44,7 @@ func (c Channel) GetByID(ctx context.Context, id uuid.UUID) (*delivery.Channel, 
 
 	var channel delivery.Channel
 
-	if err := c.unmarshal(b, &channel); err != nil {
+	if err := dc.unmarshal(b, &channel); err != nil {
 		return nil, err
 	}
 
@@ -53,24 +53,24 @@ func (c Channel) GetByID(ctx context.Context, id uuid.UUID) (*delivery.Channel, 
 	return &channel, nil
 }
 
-func (c Channel) Create(ctx context.Context, event *dapp.SystemEvent, input *delivery.ChannelInput) error {
+func (dc DeliveryChannel) Create(ctx context.Context, event *dapp.SystemEvent, input *delivery.ChannelInput) error {
 	network, ok := ctx.Value(pletyvo.ContextKeyNetwork).(*uuid.UUID)
 	if !ok {
 		network = &uuid.Nil
 	}
 
-	return c.db.Set(c.key(network, &event.ID), c.marshal(event, input), pebble.Sync)
+	return dc.db.Set(dc.key(network, &event.ID), dc.marshal(event, input), pebble.Sync)
 }
 
-func (c Channel) Update(ctx context.Context, event *dapp.SystemEvent, input *delivery.ChannelUpdateInput) error {
+func (dc DeliveryChannel) Update(ctx context.Context, event *dapp.SystemEvent, input *delivery.ChannelUpdateInput) error {
 	network, ok := ctx.Value(pletyvo.ContextKeyNetwork).(*uuid.UUID)
 	if !ok {
 		network = &uuid.Nil
 	}
 
-	key := c.key(network, nil) // TODO: use new format
+	key := dc.key(network, nil) // TODO: use new format
 
-	b, closer, err := c.db.Get(key)
+	b, closer, err := dc.db.Get(key)
 	if err != nil {
 		return err
 	}
@@ -78,7 +78,7 @@ func (c Channel) Update(ctx context.Context, event *dapp.SystemEvent, input *del
 
 	var channel delivery.Channel
 
-	if err := c.unmarshal(b, &channel); err != nil {
+	if err := dc.unmarshal(b, &channel); err != nil {
 		return err
 	}
 
@@ -90,5 +90,5 @@ func (c Channel) Update(ctx context.Context, event *dapp.SystemEvent, input *del
 		return pletyvo.CodePermissionDenied
 	}
 
-	return c.db.Set(key, c.marshal(event, input.ChannelInput), pebble.Sync)
+	return dc.db.Set(key, dc.marshal(event, input.ChannelInput), pebble.Sync)
 }

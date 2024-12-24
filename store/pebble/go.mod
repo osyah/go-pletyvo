@@ -2,8 +2,13 @@ module github.com/osyah/go-pletyvo/store/pebble
 
 go 1.21.1
 
+replace github.com/osyah/go-pletyvo => ../../.
+
 require (
+	github.com/VictoriaMetrics/easyproto v0.1.4
 	github.com/cockroachdb/pebble v1.1.2
+	github.com/google/uuid v1.6.0
+	github.com/osyah/go-pletyvo v0.0.0-00010101000000-000000000000
 	github.com/osyah/hryzun v0.0.1
 )
 

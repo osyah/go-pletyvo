@@ -1,7 +1,7 @@
 // Copyright (c) 2024 Osyah
 // SPDX-License-Identifier: MIT
 
-package deliverypebble
+package pebble
 
 import (
 	"strings"
@@ -14,7 +14,7 @@ import (
 	"github.com/osyah/go-pletyvo/protocol/delivery"
 )
 
-func (Channel) marshal(event *dapp.SystemEvent, input *delivery.ChannelInput) []byte {
+func (DeliveryChannel) marshal(event *dapp.SystemEvent, input *delivery.ChannelInput) []byte {
 	m := mp.Get()
 
 	mm := m.MessageMarshaler()
@@ -29,7 +29,7 @@ func (Channel) marshal(event *dapp.SystemEvent, input *delivery.ChannelInput) []
 	return dst
 }
 
-func (Channel) unmarshal(src []byte, channel *delivery.Channel) (err error) {
+func (DeliveryChannel) unmarshal(src []byte, channel *delivery.Channel) (err error) {
 	var fc easyproto.FieldContext
 
 	for len(src) > 0 {
@@ -37,7 +37,7 @@ func (Channel) unmarshal(src []byte, channel *delivery.Channel) (err error) {
 		if err != nil {
 			return status.New(
 				pletyvo.CodeInternal,
-				"go-pletyvo/repository/deliverypebble: cannot read next field",
+				"go-pletyvo/store/pebble: cannot read next DeliveryChannel field",
 			)
 		}
 
@@ -47,7 +47,7 @@ func (Channel) unmarshal(src []byte, channel *delivery.Channel) (err error) {
 			if !ok {
 				return status.New(
 					pletyvo.CodeInternal,
-					"go-pletyvo/repository/deliverypebble: cannot read hash",
+					"go-pletyvo/store/pebble: cannot read DeliveryChannel hash",
 				)
 			}
 
@@ -57,7 +57,7 @@ func (Channel) unmarshal(src []byte, channel *delivery.Channel) (err error) {
 			if !ok {
 				return status.New(
 					pletyvo.CodeInternal,
-					"go-pletyvo/repository/deliverypebble: cannot read author",
+					"go-pletyvo/store/pebble: cannot read DeliveryChannel author",
 				)
 			}
 
@@ -67,7 +67,7 @@ func (Channel) unmarshal(src []byte, channel *delivery.Channel) (err error) {
 			if !ok {
 				return status.New(
 					pletyvo.CodeInternal,
-					"go-pletyvo/repository/deliverypebble: cannot read name",
+					"go-pletyvo/store/pebble: cannot read DeliveryChannel name",
 				)
 			}
 

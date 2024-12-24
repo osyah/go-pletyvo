@@ -1,7 +1,7 @@
 // Copyright (c) 2024 Osyah
 // SPDX-License-Identifier: MIT
 
-package deliverypebble
+package pebble
 
 import (
 	"context"
@@ -14,13 +14,13 @@ import (
 	"github.com/osyah/go-pletyvo/protocol/delivery"
 )
 
-type Message struct{ db *pebble.DB }
+type DeliveryMessage struct{ db *pebble.DB }
 
-func NewMessage(db *pebble.DB) *Message {
-	return &Message{db: db}
+func NewDeliveryMessage(db *pebble.DB) *DeliveryMessage {
+	return &DeliveryMessage{db: db}
 }
 
-func (Message) key(ns, ch, id *uuid.UUID, sufix byte) []byte {
+func (DeliveryMessage) key(ns, ch, id *uuid.UUID, sufix byte) []byte {
 	var key []byte
 
 	if id.Version() != 0 {
@@ -39,7 +39,7 @@ func (Message) key(ns, ch, id *uuid.UUID, sufix byte) []byte {
 	return key
 }
 
-func (m Message) Get(ctx context.Context, ch uuid.UUID, option *pletyvo.QueryOption) ([]*delivery.Message, error) {
+func (dm DeliveryMessage) Get(ctx context.Context, ch uuid.UUID, option *pletyvo.QueryOption) ([]*delivery.Message, error) {
 	network, ok := ctx.Value(pletyvo.ContextKeyNetwork).(*uuid.UUID)
 	if !ok {
 		network = &uuid.Nil
@@ -47,9 +47,9 @@ func (m Message) Get(ctx context.Context, ch uuid.UUID, option *pletyvo.QueryOpt
 
 	messages := make([]*delivery.Message, 0, option.Limit)
 
-	iter, err := m.db.NewIterWithContext(ctx, &pebble.IterOptions{
-		LowerBound: m.key(network, &ch, &option.After, 0),
-		UpperBound: m.key(network, &ch, &option.Before, 255),
+	iter, err := dm.db.NewIterWithContext(ctx, &pebble.IterOptions{
+		LowerBound: dm.key(network, &ch, &option.After, 0),
+		UpperBound: dm.key(network, &ch, &option.Before, 255),
 	})
 	if err != nil {
 		return nil, err
@@ -81,7 +81,7 @@ func (m Message) Get(ctx context.Context, ch uuid.UUID, option *pletyvo.QueryOpt
 	for i := 0; i < option.Limit; i++ {
 		var message delivery.Message
 
-		if err := m.unmarshal(iter.Value(), &message); err != nil {
+		if err := dm.unmarshal(iter.Value(), &message); err != nil {
 			return nil, err
 		}
 
@@ -98,13 +98,13 @@ func (m Message) Get(ctx context.Context, ch uuid.UUID, option *pletyvo.QueryOpt
 	return messages, nil
 }
 
-func (m Message) GetByID(ctx context.Context, ch, id uuid.UUID) (*delivery.Message, error) {
+func (dm DeliveryMessage) GetByID(ctx context.Context, ch, id uuid.UUID) (*delivery.Message, error) {
 	network, ok := ctx.Value(pletyvo.ContextKeyNetwork).(*uuid.UUID)
 	if !ok {
 		network = &uuid.Nil
 	}
 
-	b, closer, err := m.db.Get(m.key(network, &ch, &id, 0))
+	b, closer, err := dm.db.Get(dm.key(network, &ch, &id, 0))
 	if err != nil {
 		return nil, err
 	}
@@ -112,7 +112,7 @@ func (m Message) GetByID(ctx context.Context, ch, id uuid.UUID) (*delivery.Messa
 
 	var message delivery.Message
 
-	if err := m.unmarshal(b, &message); err != nil {
+	if err := dm.unmarshal(b, &message); err != nil {
 		return nil, err
 	}
 
@@ -122,26 +122,26 @@ func (m Message) GetByID(ctx context.Context, ch, id uuid.UUID) (*delivery.Messa
 	return &message, nil
 }
 
-func (m Message) Create(ctx context.Context, event *dapp.SystemEvent, input *delivery.MessageInput) error {
+func (dm DeliveryMessage) Create(ctx context.Context, event *dapp.SystemEvent, input *delivery.MessageInput) error {
 	network, ok := ctx.Value(pletyvo.ContextKeyNetwork).(*uuid.UUID)
 	if !ok {
 		network = &uuid.Nil
 	}
 
-	key := m.key(network, nil, &event.ID, 0) // TODO: use new format
+	key := dm.key(network, nil, &event.ID, 0) // TODO: use new format
 
-	return m.db.Set(key, m.marshal(event, input), pebble.Sync)
+	return dm.db.Set(key, dm.marshal(event, input), pebble.Sync)
 }
 
-func (m Message) Update(ctx context.Context, event *dapp.SystemEvent, input *delivery.MessageUpdateInput) error {
+func (dm DeliveryMessage) Update(ctx context.Context, event *dapp.SystemEvent, input *delivery.MessageUpdateInput) error {
 	network, ok := ctx.Value(pletyvo.ContextKeyNetwork).(*uuid.UUID)
 	if !ok {
 		network = &uuid.Nil
 	}
 
-	key := m.key(network, nil, nil, 0) // TODO: use new format
+	key := dm.key(network, nil, nil, 0) // TODO: use new format
 
-	b, closer, err := m.db.Get(key)
+	b, closer, err := dm.db.Get(key)
 	if err != nil {
 		return err
 	}
@@ -149,11 +149,11 @@ func (m Message) Update(ctx context.Context, event *dapp.SystemEvent, input *del
 
 	var message delivery.Message
 
-	if err := m.unmarshal(b, &message); err != nil {
+	if err := dm.unmarshal(b, &message); err != nil {
 		return err
 	}
 
-	if message.Hash != input.Channel {
+	if message.Hash != input.Message {
 		return pletyvo.CodeConflict
 	}
 
@@ -161,5 +161,5 @@ func (m Message) Update(ctx context.Context, event *dapp.SystemEvent, input *del
 		return pletyvo.CodePermissionDenied
 	}
 
-	return m.db.Set(key, m.marshal(event, input.MessageInput), pebble.Sync)
+	return dm.db.Set(key, dm.marshal(event, input.MessageInput), pebble.Sync)
 }
