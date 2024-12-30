@@ -17,9 +17,5 @@ type Relay interface {
 }
 
 func Register(base *container.Base, config Config) {
-	if config.LocalDoer == nil {
-		panic("go-pletyvo/node/relay: 'local_doer' config not found")
-	} else {
-		base.RegisterHandler("local_doer", localdoer.Register(*config.LocalDoer))
-	}
+	base.RegisterHandler("local_doer", localdoer.Register())
 }
