@@ -15,8 +15,8 @@ type Config struct {
 
 func Register(base *container.Base, config Config) {
 	if config.Pebble == nil {
-		panic("go-pletyvo/store: 'pebble' config not found")
+		panic("go-pletyvo/node/store: 'pebble' config not found")
 	} else {
-		base.RegisterHandler("pebble", pebble.Register(*config.Pebble))
+		pebble.Register(base, *config.Pebble)
 	}
 }
