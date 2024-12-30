@@ -5,10 +5,6 @@ go 1.21.1
 replace (
 	github.com/osyah/go-pletyvo => ../.
 	github.com/osyah/go-pletyvo/protocol/dapp/crypto => ../protocol/dapp/crypto
-	github.com/osyah/go-pletyvo/repository => ../repository
-	github.com/osyah/go-pletyvo/repository/dapppebble => ../repository/dapppebble
-	github.com/osyah/go-pletyvo/repository/deliverypebble => ../repository/deliverypebble
-	github.com/osyah/go-pletyvo/store => ../store
 	github.com/osyah/go-pletyvo/store/pebble => ../store/pebble
 )
 
@@ -17,8 +13,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/osyah/go-pletyvo v0.0.0-00010101000000-000000000000
 	github.com/osyah/go-pletyvo/protocol/dapp/crypto v0.0.0-00010101000000-000000000000
-	github.com/osyah/go-pletyvo/repository v0.0.0-00010101000000-000000000000
-	github.com/osyah/go-pletyvo/store v0.0.0-00010101000000-000000000000
+	github.com/osyah/go-pletyvo/store/pebble v0.0.0-00010101000000-000000000000
 	github.com/osyah/hryzun v0.0.1
 	github.com/osyah/hryzun/config v0.0.0-20240910165922-f61b828b2a1e
 	github.com/rs/zerolog v1.33.0
@@ -49,9 +44,6 @@ require (
 	github.com/mattn/go-runewidth v0.0.15 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.2-0.20181231171920-c182affec369 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
-	github.com/osyah/go-pletyvo/repository/dapppebble v0.0.0 // indirect
-	github.com/osyah/go-pletyvo/repository/deliverypebble v0.0.0-00010101000000-000000000000 // indirect
-	github.com/osyah/go-pletyvo/store/pebble v0.0.0-00010101000000-000000000000 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.12.0 // indirect
 	github.com/prometheus/client_model v0.2.1-0.20210607210712-147c58e9608a // indirect

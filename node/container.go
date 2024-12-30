@@ -9,10 +9,9 @@ import (
 	"github.com/osyah/go-pletyvo/node/config"
 	"github.com/osyah/go-pletyvo/node/relay"
 	"github.com/osyah/go-pletyvo/node/service"
+	"github.com/osyah/go-pletyvo/node/store"
 	"github.com/osyah/go-pletyvo/protocol/dapp"
 	"github.com/osyah/go-pletyvo/protocol/delivery"
-	"github.com/osyah/go-pletyvo/repository"
-	"github.com/osyah/go-pletyvo/store"
 )
 
 func InitContainer(base *container.Base, config config.Node) {
@@ -21,7 +20,6 @@ func InitContainer(base *container.Base, config config.Node) {
 	}
 
 	store.Register(base, config.Store)
-	repository.Register(base)
 	relay.Register(base, config.Relay)
 	service.Register(base, config.Service)
 

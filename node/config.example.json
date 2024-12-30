@@ -6,9 +6,6 @@
     "protocol": {
       "delivery": {"repos": "delivery_pebble"}
     },
-    "relay": {
-      "local_doer": {"repos": "dapp_pebble"}
-    },
     "service": {
       "dapp_local": {"relay": "local_doer", "repos": "dapp_pebble"},
       "delivery_local": {"repos": "delivery_pebble"}
