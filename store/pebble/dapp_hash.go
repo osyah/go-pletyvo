@@ -19,11 +19,11 @@ func NewDAppHash(db *pebble.DB) *DAppHash {
 	return &DAppHash{db: db}
 }
 
-func (DAppHash) key(network pletyvo.Network, hash *dapp.Hash) []byte {
+func dAppHashKey(network pletyvo.Network, hash *dapp.Hash) []byte {
 	key := make([]byte, 37)
-	key[0] = DAppHashPrefix
+	key[4] = DAppHashPrefix
 
-	copy(key[1:5], network[2:6])
+	copy(key[0:4], network[2:6])
 	copy(key[5:], hash[:])
 
 	return key
@@ -35,7 +35,7 @@ func (dah DAppHash) GetByID(ctx context.Context, hash dapp.Hash) (*dapp.EventRes
 		network = pletyvo.DefaultNetwork
 	}
 
-	b, closer, err := dah.db.Get(dah.key(network, &hash))
+	b, closer, err := dah.db.Get(dAppHashKey(network, &hash))
 	if err != nil {
 		return nil, err
 	}
@@ -53,11 +53,11 @@ func (dah DAppHash) Create(ctx context.Context, header *dapp.EventHeader) error 
 	data := make([]byte, 32)
 	copy(data[:16], header.ID[:])
 
-	return dah.db.Set(dah.key(network, &header.Hash), data, pebble.Sync)
+	return dah.db.Set(dAppHashKey(network, &header.Hash), data, pebble.Sync)
 }
 
-func (dah DAppHash) getAggregate(network pletyvo.Network, hash *dapp.Hash) (uuid.UUID, error) {
-	b, closer, err := dah.db.Get(dah.key(network, hash))
+func getAggregate(db *pebble.DB, network pletyvo.Network, hash *dapp.Hash) (uuid.UUID, error) {
+	b, closer, err := db.Get(dAppHashKey(network, hash))
 	if err != nil {
 		return uuid.Nil, err
 	}

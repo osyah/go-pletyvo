@@ -11,7 +11,7 @@ import (
 	"github.com/osyah/go-pletyvo/protocol/dapp"
 )
 
-func (DAppEvent) marshal(event *dapp.SystemEvent) []byte {
+func marshalDAppEvent(event *dapp.SystemEvent) []byte {
 	m := mp.Get()
 
 	mm := m.MessageMarshaler()
@@ -67,7 +67,7 @@ func (dae DAppEvent) unmarshal(src []byte, event *dapp.Event) (err error) {
 		}
 	}
 
-	return nil
+	return
 }
 
 func (DAppEvent) unmarshalAuth(src []byte, auth *dapp.AuthHeader) (err error) {
@@ -116,5 +116,5 @@ func (DAppEvent) unmarshalAuth(src []byte, auth *dapp.AuthHeader) (err error) {
 		}
 	}
 
-	return nil
+	return
 }

@@ -19,34 +19,34 @@ func NewDAppEvent(db *pebble.DB) *DAppEvent {
 	return &DAppEvent{db: db}
 }
 
-func (DAppEvent) key(ns, id *uuid.UUID, sufix byte) []byte {
+func dAppEventKey(network pletyvo.Network, id *uuid.UUID, sufix byte) []byte {
 	var key []byte
 
 	if id.Version() != 0 {
-		key = make([]byte, 33)
-		copy(key[17:], id[:])
+		key = make([]byte, 21)
+		copy(key[5:], id[:])
 	} else {
-		key = make([]byte, 18)
-		key[17] = sufix
+		key = make([]byte, 6)
+		key[5] = sufix
 	}
 
-	key[0] = 0 // TODO: use new format
-	copy(key[1:], ns[:])
+	key[4] = DAppEventPrefix
+	copy(key[0:4], network[2:6])
 
 	return key
 }
 
 func (dae DAppEvent) Get(ctx context.Context, option *pletyvo.QueryOption) ([]*dapp.Event, error) {
-	network, ok := ctx.Value(pletyvo.ContextKeyNetwork).(*uuid.UUID)
+	network, ok := ctx.Value(pletyvo.ContextKeyNetwork).(pletyvo.Network)
 	if !ok {
-		network = &uuid.Nil
+		network = pletyvo.DefaultNetwork
 	}
 
 	events := make([]*dapp.Event, 0, option.Limit)
 
 	iter, err := dae.db.NewIterWithContext(ctx, &pebble.IterOptions{
-		LowerBound: dae.key(network, &option.After, 0),
-		UpperBound: dae.key(network, &option.Before, 255),
+		LowerBound: dAppEventKey(network, &option.After, 0),
+		UpperBound: dAppEventKey(network, &option.Before, 255),
 	})
 	if err != nil {
 		return nil, err
@@ -82,7 +82,7 @@ func (dae DAppEvent) Get(ctx context.Context, option *pletyvo.QueryOption) ([]*d
 			return nil, err
 		}
 
-		event.ID = uuid.UUID(iter.Key()[17:33])
+		event.ID = uuid.UUID(iter.Key()[5:21])
 		events = append(events, &event)
 
 		if !next() {
@@ -94,12 +94,12 @@ func (dae DAppEvent) Get(ctx context.Context, option *pletyvo.QueryOption) ([]*d
 }
 
 func (dae DAppEvent) GetByID(ctx context.Context, id uuid.UUID) (*dapp.Event, error) {
-	network, ok := ctx.Value(pletyvo.ContextKeyNetwork).(*uuid.UUID)
+	network, ok := ctx.Value(pletyvo.ContextKeyNetwork).(pletyvo.Network)
 	if !ok {
-		network = &uuid.Nil
+		network = pletyvo.DefaultNetwork
 	}
 
-	b, closer, err := dae.db.Get(dae.key(network, &id, 0))
+	b, closer, err := dae.db.Get(dAppEventKey(network, &id, 0))
 	if err != nil {
 		return nil, err
 	}
@@ -117,10 +117,28 @@ func (dae DAppEvent) GetByID(ctx context.Context, id uuid.UUID) (*dapp.Event, er
 }
 
 func (dae DAppEvent) Create(ctx context.Context, event *dapp.SystemEvent) error {
-	network, ok := ctx.Value(pletyvo.ContextKeyNetwork).(*uuid.UUID)
+	network, ok := ctx.Value(pletyvo.ContextKeyNetwork).(pletyvo.Network)
 	if !ok {
-		network = &uuid.Nil
+		network = pletyvo.DefaultNetwork
 	}
 
-	return dae.db.Set(dae.key(network, &event.ID, 0), dae.marshal(event), pebble.Sync)
+	batch := dae.db.NewBatchWithSize(2)
+	defer batch.Close()
+
+	saveEventAndHash(batch, network, event, nil)
+
+	return batch.Commit(pebble.Sync)
+}
+
+func saveEventAndHash(batch *pebble.Batch, network pletyvo.Network, event *dapp.SystemEvent, aggregate *uuid.UUID) {
+	batch.Set(dAppEventKey(network, &event.ID, 0), marshalDAppEvent(event), nil)
+
+	data := make([]byte, 32)
+	copy(data[:16], event.ID[:])
+
+	if aggregate != nil {
+		copy(data[16:], aggregate[:])
+	}
+
+	batch.Set(dAppHashKey(network, &event.Hash), data, nil)
 }

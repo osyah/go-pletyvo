@@ -20,20 +20,20 @@ func NewDeliveryChannel(db *pebble.DB) *DeliveryChannel {
 	return &DeliveryChannel{db: db}
 }
 
-func (DeliveryChannel) key(ns, id *uuid.UUID) []byte {
-	key := make([]byte, 33)
-	key[0] = 0 // TODO: use new format
+func (DeliveryChannel) key(network pletyvo.Network, id *uuid.UUID) []byte {
+	key := make([]byte, 21)
+	key[4] = DeliveryChannelPrefix
 
-	copy(key[1:], ns[:])
-	copy(key[17:], id[:])
+	copy(key[0:4], network[2:6])
+	copy(key[6:], id[:])
 
 	return key
 }
 
 func (dc DeliveryChannel) GetByID(ctx context.Context, id uuid.UUID) (*delivery.Channel, error) {
-	network, ok := ctx.Value(pletyvo.ContextKeyNetwork).(*uuid.UUID)
+	network, ok := ctx.Value(pletyvo.ContextKeyNetwork).(pletyvo.Network)
 	if !ok {
-		network = &uuid.Nil
+		network = pletyvo.DefaultNetwork
 	}
 
 	b, closer, err := dc.db.Get(dc.key(network, &id))
@@ -54,21 +54,33 @@ func (dc DeliveryChannel) GetByID(ctx context.Context, id uuid.UUID) (*delivery.
 }
 
 func (dc DeliveryChannel) Create(ctx context.Context, event *dapp.SystemEvent, input *delivery.ChannelInput) error {
-	network, ok := ctx.Value(pletyvo.ContextKeyNetwork).(*uuid.UUID)
+	network, ok := ctx.Value(pletyvo.ContextKeyNetwork).(pletyvo.Network)
 	if !ok {
-		network = &uuid.Nil
+		network = pletyvo.DefaultNetwork
 	}
 
-	return dc.db.Set(dc.key(network, &event.ID), dc.marshal(event, input), pebble.Sync)
+	batch := dc.db.NewBatchWithSize(3)
+	defer batch.Close()
+
+	batch.Set(dc.key(network, &event.ID), dc.marshal(event, input), nil)
+
+	saveEventAndHash(batch, network, event, &event.ID)
+
+	return batch.Commit(pebble.Sync)
 }
 
 func (dc DeliveryChannel) Update(ctx context.Context, event *dapp.SystemEvent, input *delivery.ChannelUpdateInput) error {
-	network, ok := ctx.Value(pletyvo.ContextKeyNetwork).(*uuid.UUID)
+	network, ok := ctx.Value(pletyvo.ContextKeyNetwork).(pletyvo.Network)
 	if !ok {
-		network = &uuid.Nil
+		network = pletyvo.DefaultNetwork
 	}
 
-	key := dc.key(network, nil) // TODO: use new format
+	id, err := getAggregate(dc.db, network, &input.Channel)
+	if err != nil {
+		return err
+	}
+
+	key := dc.key(network, &id)
 
 	b, closer, err := dc.db.Get(key)
 	if err != nil {
@@ -90,5 +102,12 @@ func (dc DeliveryChannel) Update(ctx context.Context, event *dapp.SystemEvent, i
 		return pletyvo.CodePermissionDenied
 	}
 
-	return dc.db.Set(key, dc.marshal(event, input.ChannelInput), pebble.Sync)
+	batch := dc.db.NewBatchWithSize(3)
+	defer batch.Close()
+
+	batch.Set(key, dc.marshal(event, input.ChannelInput), nil)
+
+	saveEventAndHash(batch, network, event, &id)
+
+	return batch.Commit(pebble.Sync)
 }

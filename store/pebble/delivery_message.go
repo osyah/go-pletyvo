@@ -20,29 +20,29 @@ func NewDeliveryMessage(db *pebble.DB) *DeliveryMessage {
 	return &DeliveryMessage{db: db}
 }
 
-func (DeliveryMessage) key(ns, ch, id *uuid.UUID, sufix byte) []byte {
+func (DeliveryMessage) key(network pletyvo.Network, channel, id *uuid.UUID, sufix byte) []byte {
 	var key []byte
 
 	if id.Version() != 0 {
-		key = make([]byte, 49)
-		copy(key[33:], id[:])
+		key = make([]byte, 37)
+		copy(key[21:], id[:])
 	} else {
-		key = make([]byte, 34)
-		key[33] = sufix
+		key = make([]byte, 22)
+		key[21] = sufix
 	}
 
-	key[0] = 0 // TODO: use new format
+	key[4] = DeliveryMessagePrefix
 
-	copy(key[1:], ns[:])
-	copy(key[17:], ch[:])
+	copy(key[0:4], network[2:6])
+	copy(key[5:21], channel[:])
 
 	return key
 }
 
 func (dm DeliveryMessage) Get(ctx context.Context, ch uuid.UUID, option *pletyvo.QueryOption) ([]*delivery.Message, error) {
-	network, ok := ctx.Value(pletyvo.ContextKeyNetwork).(*uuid.UUID)
+	network, ok := ctx.Value(pletyvo.ContextKeyNetwork).(pletyvo.Network)
 	if !ok {
-		network = &uuid.Nil
+		network = pletyvo.DefaultNetwork
 	}
 
 	messages := make([]*delivery.Message, 0, option.Limit)
@@ -85,7 +85,7 @@ func (dm DeliveryMessage) Get(ctx context.Context, ch uuid.UUID, option *pletyvo
 			return nil, err
 		}
 
-		message.ID = uuid.UUID(iter.Key()[33:49])
+		message.ID = uuid.UUID(iter.Key()[21:37])
 		message.Channel = ch
 
 		messages = append(messages, &message)
@@ -99,9 +99,9 @@ func (dm DeliveryMessage) Get(ctx context.Context, ch uuid.UUID, option *pletyvo
 }
 
 func (dm DeliveryMessage) GetByID(ctx context.Context, ch, id uuid.UUID) (*delivery.Message, error) {
-	network, ok := ctx.Value(pletyvo.ContextKeyNetwork).(*uuid.UUID)
+	network, ok := ctx.Value(pletyvo.ContextKeyNetwork).(pletyvo.Network)
 	if !ok {
-		network = &uuid.Nil
+		network = pletyvo.DefaultNetwork
 	}
 
 	b, closer, err := dm.db.Get(dm.key(network, &ch, &id, 0))
@@ -123,23 +123,43 @@ func (dm DeliveryMessage) GetByID(ctx context.Context, ch, id uuid.UUID) (*deliv
 }
 
 func (dm DeliveryMessage) Create(ctx context.Context, event *dapp.SystemEvent, input *delivery.MessageInput) error {
-	network, ok := ctx.Value(pletyvo.ContextKeyNetwork).(*uuid.UUID)
+	network, ok := ctx.Value(pletyvo.ContextKeyNetwork).(pletyvo.Network)
 	if !ok {
-		network = &uuid.Nil
+		network = pletyvo.DefaultNetwork
 	}
 
-	key := dm.key(network, nil, &event.ID, 0) // TODO: use new format
+	channel, err := getAggregate(dm.db, network, &input.Channel)
+	if err != nil {
+		return err
+	}
 
-	return dm.db.Set(key, dm.marshal(event, input), pebble.Sync)
+	batch := dm.db.NewBatchWithSize(3)
+	defer batch.Close()
+
+	batch.Set(dm.key(network, &channel, &event.ID, 0), dm.marshal(event, input), nil)
+
+	saveEventAndHash(batch, network, event, &event.ID)
+
+	return batch.Commit(pebble.Sync)
 }
 
 func (dm DeliveryMessage) Update(ctx context.Context, event *dapp.SystemEvent, input *delivery.MessageUpdateInput) error {
-	network, ok := ctx.Value(pletyvo.ContextKeyNetwork).(*uuid.UUID)
+	network, ok := ctx.Value(pletyvo.ContextKeyNetwork).(pletyvo.Network)
 	if !ok {
-		network = &uuid.Nil
+		network = pletyvo.DefaultNetwork
 	}
 
-	key := dm.key(network, nil, nil, 0) // TODO: use new format
+	channel, err := getAggregate(dm.db, network, &input.Channel)
+	if err != nil {
+		return err
+	}
+
+	id, err := getAggregate(dm.db, network, &input.Message)
+	if err != nil {
+		return err
+	}
+
+	key := dm.key(network, &channel, &id, 0)
 
 	b, closer, err := dm.db.Get(key)
 	if err != nil {
@@ -161,5 +181,12 @@ func (dm DeliveryMessage) Update(ctx context.Context, event *dapp.SystemEvent, i
 		return pletyvo.CodePermissionDenied
 	}
 
-	return dm.db.Set(key, dm.marshal(event, input.MessageInput), pebble.Sync)
+	batch := dm.db.NewBatchWithSize(3)
+	defer batch.Close()
+
+	batch.Set(key, dm.marshal(event, input.MessageInput), nil)
+
+	saveEventAndHash(batch, network, event, &id)
+
+	return batch.Commit(pebble.Sync)
 }
