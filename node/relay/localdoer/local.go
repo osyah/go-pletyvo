@@ -11,38 +11,18 @@ import (
 	"github.com/osyah/go-pletyvo/protocol/dapp"
 )
 
-type Config struct {
-	Repos string `cfg:"repos"`
-}
+type Relay struct{ handler *dapp.Handler }
 
-type Relay struct {
-	handler *dapp.Handler
-	repos   dapp.EventRepository
-	hash    dapp.HashRepository
-}
-
-func New(handler *dapp.Handler, repos *dapp.Repository) *Relay {
-	return &Relay{handler: handler, repos: repos.Event, hash: repos.Hash}
+func New(handler *dapp.Handler) *Relay {
+	return &Relay{handler: handler}
 }
 
 func (r Relay) OnEvent(ctx context.Context, event *dapp.SystemEvent) error {
-	err := r.handler.Handle(ctx, event)
-	if err != nil {
-		return err
-	}
-
-	if err = r.repos.Create(ctx, event); err != nil {
-		return err
-	}
-
-	return r.hash.Create(ctx, event.EventHeader)
+	return r.handler.Handle(ctx, event)
 }
 
-func Register(config Config) container.Handler {
+func Register() container.Handler {
 	return func(base *container.Base) any {
-		return New(
-			container.Get[*dapp.Handler](base, "handler"),
-			container.Get[*dapp.Repository](base, config.Repos),
-		)
+		return New(container.Get[*dapp.Handler](base, "handler"))
 	}
 }
