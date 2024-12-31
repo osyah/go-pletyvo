@@ -18,7 +18,7 @@ func NewMessage(service delivery.MessageQuery) *Message {
 }
 
 func (m Message) RegisterRoutes(router fiber.Router) {
-	message := router.Group("/channels/:channel/messages")
+	message := router.Group("/channel/:channel/messages")
 	{
 		message.Get("/", m.getHandler)
 		message.Get("/:message", m.getByIDHandler)
