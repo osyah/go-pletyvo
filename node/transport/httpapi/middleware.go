@@ -5,23 +5,21 @@ package httpapi
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
 
 	"github.com/osyah/go-pletyvo"
+	"github.com/osyah/go-pletyvo/node/pkg/net/http"
 )
 
 func NetworkMiddleware(ctx *fiber.Ctx) error {
 	s := ctx.Get("Network")
 
 	if len(s) != 0 {
-		id, err := uuid.Parse(s)
+		network, err := pletyvo.NetworkFromString(s)
 		if err != nil {
-			return ctx.SendStatus(fiber.StatusBadRequest)
+			return http.ErrorHandler(ctx, err)
 		}
 
-		ctx.Context().SetUserValue(pletyvo.ContextKeyNetwork, &id)
-	} else {
-		ctx.Context().SetUserValue(pletyvo.ContextKeyNetwork, &uuid.UUID{})
+		ctx.Context().SetUserValue(pletyvo.ContextKeyNetwork, network)
 	}
 
 	return ctx.Next()
