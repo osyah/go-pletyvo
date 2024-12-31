@@ -15,7 +15,7 @@ import (
 	"github.com/osyah/go-pletyvo/protocol/delivery"
 )
 
-const channelPath = "/delivery/v1/channels/%s"
+const channelPath = "/delivery/v1/channel/%s"
 
 type Channel struct {
 	engine engine.HTTP
