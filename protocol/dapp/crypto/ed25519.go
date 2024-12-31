@@ -11,7 +11,7 @@ import (
 	"github.com/osyah/go-pletyvo/protocol/dapp"
 )
 
-const SchemaED25519 = 0
+const SchemaED25519 = 1
 
 type ED25519 struct{ privateKey ed25519.PrivateKey }
 
