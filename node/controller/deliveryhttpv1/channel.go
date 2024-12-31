@@ -18,7 +18,7 @@ func NewChannel(service delivery.ChannelQuery) *Channel {
 }
 
 func (c Channel) RegisterRoutes(router fiber.Router) {
-	channel := router.Group("/channels/:channel")
+	channel := router.Group("/channel/:channel")
 	{
 		channel.Get("/", c.getByIDHandler)
 	}
