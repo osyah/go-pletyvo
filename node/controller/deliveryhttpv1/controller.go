@@ -1,4 +1,4 @@
-// Copyright (c) 2024 Osyah
+// Copyright (c) 2024-2025 Osyah
 // SPDX-License-Identifier: MIT
 
 package deliveryhttpv1
@@ -19,6 +19,6 @@ func (c Controller) RegisterRoutes(router fiber.Router) {
 	v1 := router.Group("/v1")
 	{
 		NewChannel(c.query.Channel).RegisterRoutes(v1)
-		NewMessage(c.query.Message).RegisterRoutes(v1)
+		NewPost(c.query.Post).RegisterRoutes(v1)
 	}
 }

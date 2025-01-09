@@ -1,4 +1,4 @@
-// Copyright (c) 2024 Osyah
+// Copyright (c) 2024-2025 Osyah
 // SPDX-License-Identifier: MIT
 
 package deliveryhttpv1
@@ -11,21 +11,21 @@ import (
 	"github.com/osyah/go-pletyvo/protocol/delivery"
 )
 
-type Message struct{ service delivery.MessageQuery }
+type Post struct{ service delivery.PostQuery }
 
-func NewMessage(service delivery.MessageQuery) *Message {
-	return &Message{service: service}
+func NewPost(service delivery.PostQuery) *Post {
+	return &Post{service: service}
 }
 
-func (m Message) RegisterRoutes(router fiber.Router) {
-	message := router.Group("/channel/:channel/messages")
+func (p Post) RegisterRoutes(router fiber.Router) {
+	post := router.Group("/channel/:channel/posts")
 	{
-		message.Get("/", m.getHandler)
-		message.Get("/:message", m.getByIDHandler)
+		post.Get("/", p.getHandler)
+		post.Get("/:post", p.getByIDHandler)
 	}
 }
 
-func (m Message) getHandler(ctx *fiber.Ctx) error {
+func (p Post) getHandler(ctx *fiber.Ctx) error {
 	channel, err := uuid.Parse(ctx.Params("channel"))
 	if err != nil {
 		return ctx.SendStatus(fiber.StatusBadRequest)
@@ -36,29 +36,29 @@ func (m Message) getHandler(ctx *fiber.Ctx) error {
 		return ctx.SendStatus(fiber.StatusBadRequest)
 	}
 
-	events, err := m.service.Get(ctx.Context(), channel, option)
+	posts, err := p.service.Get(ctx.Context(), channel, option)
 	if err != nil {
 		return http.ErrorHandler(ctx, err)
 	}
 
-	return ctx.JSON(events)
+	return ctx.JSON(posts)
 }
 
-func (m Message) getByIDHandler(ctx *fiber.Ctx) error {
+func (p Post) getByIDHandler(ctx *fiber.Ctx) error {
 	channel, err := uuid.Parse(ctx.Params("channel"))
 	if err != nil {
 		return ctx.SendStatus(fiber.StatusBadRequest)
 	}
 
-	id, err := uuid.Parse(ctx.Params("message"))
+	id, err := uuid.Parse(ctx.Params("post"))
 	if err != nil {
 		return ctx.SendStatus(fiber.StatusBadRequest)
 	}
 
-	message, err := m.service.GetByID(ctx.Context(), channel, id)
+	post, err := p.service.GetByID(ctx.Context(), channel, id)
 	if err != nil {
 		return http.ErrorHandler(ctx, err)
 	}
 
-	return ctx.JSON(message)
+	return ctx.JSON(post)
 }

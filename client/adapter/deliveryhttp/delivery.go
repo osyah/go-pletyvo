@@ -1,4 +1,4 @@
-// Copyright (c) 2024 Osyah
+// Copyright (c) 2024-2025 Osyah
 // SPDX-License-Identifier: MIT
 
 package deliveryhttp
@@ -13,6 +13,6 @@ import (
 func New(engine engine.HTTP, signer crypto.Signer, event dapp.EventService) *delivery.Service {
 	return &delivery.Service{
 		Channel: NewChannel(engine, signer, event),
-		Message: NewMessage(engine, signer, event),
+		Post:    NewPost(engine, signer, event),
 	}
 }

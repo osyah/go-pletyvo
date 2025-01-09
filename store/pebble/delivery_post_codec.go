@@ -1,4 +1,4 @@
-// Copyright (c) 2024 Osyah
+// Copyright (c) 2024-2025 Osyah
 // SPDX-License-Identifier: MIT
 
 package pebble
@@ -14,7 +14,7 @@ import (
 	"github.com/osyah/go-pletyvo/protocol/delivery"
 )
 
-func (DeliveryMessage) marshal(event *dapp.SystemEvent, input *delivery.MessageInput) []byte {
+func (DeliveryPost) marshal(event *dapp.SystemEvent, input *delivery.PostInput) []byte {
 	mr := mp.Get()
 
 	mm := mr.MessageMarshaler()
@@ -29,7 +29,7 @@ func (DeliveryMessage) marshal(event *dapp.SystemEvent, input *delivery.MessageI
 	return dst
 }
 
-func (DeliveryMessage) unmarshal(src []byte, message *delivery.Message) (err error) {
+func (DeliveryPost) unmarshal(src []byte, post *delivery.Post) (err error) {
 	var fc easyproto.FieldContext
 
 	for len(src) > 0 {
@@ -37,7 +37,7 @@ func (DeliveryMessage) unmarshal(src []byte, message *delivery.Message) (err err
 		if err != nil {
 			return status.New(
 				pletyvo.CodeInternal,
-				"go-pletyvo/store/pebble: cannot read next DeliveryMessage field",
+				"go-pletyvo/store/pebble: cannot read next DeliveryPost field",
 			)
 		}
 
@@ -47,33 +47,33 @@ func (DeliveryMessage) unmarshal(src []byte, message *delivery.Message) (err err
 			if !ok {
 				return status.New(
 					pletyvo.CodeInternal,
-					"go-pletyvo/store/pebble: cannot read DeliveryMessage hash",
+					"go-pletyvo/store/pebble: cannot read DeliveryPost hash",
 				)
 			}
 
-			message.Hash = dapp.Hash(hash)
+			post.Hash = dapp.Hash(hash)
 		case 2:
 			author, ok := fc.Bytes()
 			if !ok {
 				return status.New(
 					pletyvo.CodeInternal,
-					"go-pletyvo/store/pebble: cannot read DeliveryMessage author",
+					"go-pletyvo/store/pebble: cannot read DeliveryPost author",
 				)
 			}
 
-			message.Author = dapp.Hash(author)
+			post.Author = dapp.Hash(author)
 		case 3:
 			content, ok := fc.String()
 			if !ok {
 				return status.New(
 					pletyvo.CodeInternal,
-					"go-pletyvo/store/pebble: cannot read DeliveryMessage content",
+					"go-pletyvo/store/pebble: cannot read DeliveryPost content",
 				)
 			}
 
-			message.Content = strings.Clone(content)
+			post.Content = strings.Clone(content)
 		}
 	}
 
-	return nil
+	return
 }

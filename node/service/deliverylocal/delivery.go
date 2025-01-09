@@ -1,4 +1,4 @@
-// Copyright (c) 2024 Osyah
+// Copyright (c) 2024-2025 Osyah
 // SPDX-License-Identifier: MIT
 
 package deliverylocal
@@ -16,7 +16,7 @@ type Config struct {
 func NewQuery(repos *delivery.Repository) *delivery.Query {
 	return &delivery.Query{
 		Channel: NewChannel(repos.Channel),
-		Message: NewMessage(repos.Message),
+		Post:    NewPost(repos.Post),
 	}
 }
 

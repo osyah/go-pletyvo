@@ -14,13 +14,13 @@ import (
 	"github.com/osyah/go-pletyvo/protocol/delivery"
 )
 
-type DeliveryMessage struct{ db *pebble.DB }
+type DeliveryPost struct{ db *pebble.DB }
 
-func NewDeliveryMessage(db *pebble.DB) *DeliveryMessage {
-	return &DeliveryMessage{db: db}
+func NewDeliveryPost(db *pebble.DB) *DeliveryPost {
+	return &DeliveryPost{db: db}
 }
 
-func (DeliveryMessage) key(network pletyvo.Network, channel, id *uuid.UUID, sufix byte) []byte {
+func (DeliveryPost) key(network pletyvo.Network, channel, id *uuid.UUID, sufix byte) []byte {
 	var key []byte
 
 	if id.Version() != 0 {
@@ -31,7 +31,7 @@ func (DeliveryMessage) key(network pletyvo.Network, channel, id *uuid.UUID, sufi
 		key[21] = sufix
 	}
 
-	key[4] = DeliveryMessagePrefix
+	key[4] = DeliveryPostPrefix
 
 	copy(key[0:4], network[2:6])
 	copy(key[5:21], channel[:])
@@ -39,17 +39,17 @@ func (DeliveryMessage) key(network pletyvo.Network, channel, id *uuid.UUID, sufi
 	return key
 }
 
-func (dm DeliveryMessage) Get(ctx context.Context, ch uuid.UUID, option *pletyvo.QueryOption) ([]*delivery.Message, error) {
+func (dp DeliveryPost) Get(ctx context.Context, ch uuid.UUID, option *pletyvo.QueryOption) ([]*delivery.Post, error) {
 	network, ok := ctx.Value(pletyvo.ContextKeyNetwork).(pletyvo.Network)
 	if !ok {
 		network = pletyvo.DefaultNetwork
 	}
 
-	messages := make([]*delivery.Message, 0, option.Limit)
+	posts := make([]*delivery.Post, 0, option.Limit)
 
-	iter, err := dm.db.NewIterWithContext(ctx, &pebble.IterOptions{
-		LowerBound: dm.key(network, &ch, &option.After, 0),
-		UpperBound: dm.key(network, &ch, &option.Before, 255),
+	iter, err := dp.db.NewIterWithContext(ctx, &pebble.IterOptions{
+		LowerBound: dp.key(network, &ch, &option.After, 0),
+		UpperBound: dp.key(network, &ch, &option.Before, 255),
 	})
 	if err != nil {
 		return nil, err
@@ -79,108 +79,108 @@ func (dm DeliveryMessage) Get(ctx context.Context, ch uuid.UUID, option *pletyvo
 	}
 
 	for i := 0; i < option.Limit; i++ {
-		var message delivery.Message
+		var post delivery.Post
 
-		if err := dm.unmarshal(iter.Value(), &message); err != nil {
+		if err := dp.unmarshal(iter.Value(), &post); err != nil {
 			return nil, err
 		}
 
-		message.ID = uuid.UUID(iter.Key()[21:37])
-		message.Channel = ch
+		post.ID = uuid.UUID(iter.Key()[21:37])
+		post.Channel = ch
 
-		messages = append(messages, &message)
+		posts = append(posts, &post)
 
 		if !next() {
 			break
 		}
 	}
 
-	return messages, nil
+	return posts, nil
 }
 
-func (dm DeliveryMessage) GetByID(ctx context.Context, ch, id uuid.UUID) (*delivery.Message, error) {
+func (dp DeliveryPost) GetByID(ctx context.Context, ch, id uuid.UUID) (*delivery.Post, error) {
 	network, ok := ctx.Value(pletyvo.ContextKeyNetwork).(pletyvo.Network)
 	if !ok {
 		network = pletyvo.DefaultNetwork
 	}
 
-	b, closer, err := dm.db.Get(dm.key(network, &ch, &id, 0))
+	b, closer, err := dp.db.Get(dp.key(network, &ch, &id, 0))
 	if err != nil {
 		return nil, err
 	}
 	defer closer.Close()
 
-	var message delivery.Message
+	var post delivery.Post
 
-	if err := dm.unmarshal(b, &message); err != nil {
+	if err := dp.unmarshal(b, &post); err != nil {
 		return nil, err
 	}
 
-	message.ID = id
-	message.Channel = ch
+	post.ID = id
+	post.Channel = ch
 
-	return &message, nil
+	return &post, nil
 }
 
-func (dm DeliveryMessage) Create(ctx context.Context, event *dapp.SystemEvent, input *delivery.MessageInput) error {
+func (dp DeliveryPost) Create(ctx context.Context, event *dapp.SystemEvent, input *delivery.PostInput) error {
 	network, ok := ctx.Value(pletyvo.ContextKeyNetwork).(pletyvo.Network)
 	if !ok {
 		network = pletyvo.DefaultNetwork
 	}
 
-	channel, err := getAggregate(dm.db, network, &input.Channel)
+	channel, err := getAggregate(dp.db, network, &input.Channel)
 	if err != nil {
 		return err
 	}
 
-	batch := dm.db.NewBatchWithSize(3)
+	batch := dp.db.NewBatchWithSize(3)
 	defer batch.Close()
 
-	batch.Set(dm.key(network, &channel, &event.ID, 0), dm.marshal(event, input), nil)
+	batch.Set(dp.key(network, &channel, &event.ID, 0), dp.marshal(event, input), nil)
 
 	saveEventAndHash(batch, network, event, &event.ID)
 
 	return batch.Commit(pebble.Sync)
 }
 
-func (dm DeliveryMessage) Update(ctx context.Context, event *dapp.SystemEvent, input *delivery.MessageUpdateInput) error {
+func (dp DeliveryPost) Update(ctx context.Context, event *dapp.SystemEvent, input *delivery.PostUpdateInput) error {
 	network, ok := ctx.Value(pletyvo.ContextKeyNetwork).(pletyvo.Network)
 	if !ok {
 		network = pletyvo.DefaultNetwork
 	}
 
-	channel, err := getAggregate(dm.db, network, &input.Channel)
+	channel, err := getAggregate(dp.db, network, &input.Channel)
 	if err != nil {
 		return err
 	}
 
-	id, err := getAggregate(dm.db, network, &input.Message)
+	id, err := getAggregate(dp.db, network, &input.Post)
 	if err != nil {
 		return err
 	}
 
-	key := dm.key(network, &channel, &id, 0)
+	key := dp.key(network, &channel, &id, 0)
 
-	b, closer, err := dm.db.Get(key)
+	b, closer, err := dp.db.Get(key)
 	if err != nil {
 		return err
 	}
 	defer closer.Close()
 
-	var message delivery.Message
+	var post delivery.Post
 
-	if err := dm.unmarshal(b, &message); err != nil {
+	if err := dp.unmarshal(b, &post); err != nil {
 		return err
 	}
 
-	if message.Hash != input.Message {
+	if post.Hash != input.Post {
 		return pletyvo.CodeConflict
 	}
 
-	batch := dm.db.NewBatchWithSize(3)
+	batch := dp.db.NewBatchWithSize(3)
 	defer batch.Close()
 
-	batch.Set(key, dm.marshal(event, input.MessageInput), nil)
+	batch.Set(key, dp.marshal(event, input.PostInput), nil)
 
 	saveEventAndHash(batch, network, event, &id)
 

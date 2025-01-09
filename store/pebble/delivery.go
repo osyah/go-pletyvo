@@ -1,4 +1,4 @@
-// Copyright (c) 2024 Osyah
+// Copyright (c) 2024-2025 Osyah
 // SPDX-License-Identifier: MIT
 
 package pebble
@@ -11,12 +11,12 @@ import (
 
 const (
 	DeliveryChannelPrefix = 4
-	DeliveryMessagePrefix = 5
+	DeliveryPostPrefix    = 5
 )
 
 func NewDelivery(db *pebble.DB) *delivery.Repository {
 	return &delivery.Repository{
 		Channel: NewDeliveryChannel(db),
-		Message: NewDeliveryMessage(db),
+		Post:    NewDeliveryPost(db),
 	}
 }
