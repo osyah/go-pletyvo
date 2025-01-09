@@ -1,4 +1,4 @@
-// Copyright (c) 2024 Osyah
+// Copyright (c) 2024-2025 Osyah
 // SPDX-License-Identifier: MIT
 
 package pebble
@@ -49,6 +49,34 @@ func (dc DeliveryChannel) GetByID(ctx context.Context, id uuid.UUID) (*delivery.
 	}
 
 	channel.ID = id
+
+	return &channel, nil
+}
+
+func (dc DeliveryChannel) GetByHash(ctx context.Context, hash dapp.Hash) (*delivery.Channel, error) {
+	network, ok := ctx.Value(pletyvo.ContextKeyNetwork).(pletyvo.Network)
+	if !ok {
+		network = pletyvo.DefaultNetwork
+	}
+
+	id, err := getAggregate(dc.db, network, &hash)
+	if err != nil {
+		return nil, err
+	}
+
+	key := dc.key(network, &id)
+
+	b, closer, err := dc.db.Get(key)
+	if err != nil {
+		return nil, err
+	}
+	defer closer.Close()
+
+	var channel delivery.Channel
+
+	if err = dc.unmarshal(b, &channel); err != nil {
+		return nil, err
+	}
 
 	return &channel, nil
 }
