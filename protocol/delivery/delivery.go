@@ -1,4 +1,4 @@
-// Copyright (c) 2024 Osyah
+// Copyright (c) 2024-2025 Osyah
 // SPDX-License-Identifier: MIT
 
 package delivery
@@ -28,7 +28,7 @@ type Executor struct {
 func NewExecutor(repos *Repository) *Executor {
 	return &Executor{
 		Channel: NewChannelExecutor(repos.Channel),
-		Message: NewMessageExecutor(repos.Message),
+		Message: NewMessageExecutor(repos.Message, repos.Channel),
 	}
 }
 

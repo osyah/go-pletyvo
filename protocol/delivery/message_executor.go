@@ -1,4 +1,4 @@
-// Copyright (c) 2024 Osyah
+// Copyright (c) 2024-2025 Osyah
 // SPDX-License-Identifier: MIT
 
 package delivery
@@ -6,13 +6,17 @@ package delivery
 import (
 	"context"
 
+	"github.com/osyah/go-pletyvo"
 	"github.com/osyah/go-pletyvo/protocol/dapp"
 )
 
-type MessageExecutor struct{ repos MessageRepository }
+type MessageExecutor struct {
+	repos   MessageRepository
+	channel ChannelRepository
+}
 
-func NewMessageExecutor(repos MessageRepository) *MessageExecutor {
-	return &MessageExecutor{repos: repos}
+func NewMessageExecutor(repos MessageRepository, channel ChannelRepository) *MessageExecutor {
+	return &MessageExecutor{repos: repos, channel: channel}
 }
 
 func (me MessageExecutor) Register(handler *dapp.Handler) {
@@ -31,6 +35,15 @@ func (me MessageExecutor) Create(ctx context.Context, event *dapp.SystemEvent) e
 		return err
 	}
 
+	channel, err := me.channel.GetByHash(ctx, input.Channel)
+	if err != nil {
+		return err
+	}
+
+	if channel.Author != event.Author {
+		return pletyvo.CodePermissionDenied
+	}
+
 	return me.repos.Create(ctx, event, &input)
 }
 
@@ -43,6 +56,15 @@ func (me MessageExecutor) Update(ctx context.Context, event *dapp.SystemEvent) e
 
 	if err := input.Validate(); err != nil {
 		return err
+	}
+
+	channel, err := me.channel.GetByHash(ctx, input.Channel)
+	if err != nil {
+		return err
+	}
+
+	if channel.Author != event.Author {
+		return pletyvo.CodePermissionDenied
 	}
 
 	return me.repos.Update(ctx, event, &input)
