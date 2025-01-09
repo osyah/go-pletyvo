@@ -1,4 +1,4 @@
-// Copyright (c) 2024 Osyah
+// Copyright (c) 2024-2025 Osyah
 // SPDX-License-Identifier: MIT
 
 package pebble
@@ -175,10 +175,6 @@ func (dm DeliveryMessage) Update(ctx context.Context, event *dapp.SystemEvent, i
 
 	if message.Hash != input.Message {
 		return pletyvo.CodeConflict
-	}
-
-	if message.Author != event.Author {
-		return pletyvo.CodePermissionDenied
 	}
 
 	batch := dm.db.NewBatchWithSize(3)
