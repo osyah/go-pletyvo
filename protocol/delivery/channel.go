@@ -1,4 +1,4 @@
-// Copyright (c) 2024 Osyah
+// Copyright (c) 2024-2025 Osyah
 // SPDX-License-Identifier: MIT
 
 package delivery
@@ -58,6 +58,7 @@ func (cui ChannelUpdateInput) Validate() error {
 
 type ChannelRepository interface {
 	ChannelQuery
+	GetByHash(context.Context, dapp.Hash) (*Channel, error)
 	Create(context.Context, *dapp.SystemEvent, *ChannelInput) error
 	Update(context.Context, *dapp.SystemEvent, *ChannelUpdateInput) error
 }
