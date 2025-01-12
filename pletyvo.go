@@ -1,4 +1,4 @@
-// Copyright (c) 2024 Osyah
+// Copyright (c) 2024-2025 Osyah
 // SPDX-License-Identifier: MIT
 
 package pletyvo
@@ -24,6 +24,7 @@ const (
 	CodeInvalidArgument
 	CodeUnauthorized
 	CodeConflict
+	CodeNotImplemented
 )
 
 type QueryOption struct {
