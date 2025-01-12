@@ -1,4 +1,4 @@
-// Copyright (c) 2024 Osyah
+// Copyright (c) 2024-2025 Osyah
 // SPDX-License-Identifier: MIT
 
 package http
@@ -40,6 +40,8 @@ func WrapStatus(code status.Code) int {
 		return fiber.StatusUnauthorized
 	case pletyvo.CodeConflict:
 		return fiber.StatusConflict
+	case pletyvo.CodeNotImplemented:
+		return fiber.StatusNotImplemented
 	default:
 		return fiber.StatusBadRequest
 	}
