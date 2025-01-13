@@ -87,5 +87,9 @@ func (e Engine) Post(ctx context.Context, endpoint string, body, value any) erro
 		return ErrorHandler(resp)
 	}
 
+	if value == nil {
+		return nil
+	}
+
 	return json.NewDecoder(resp.Body).Decode(value)
 }
