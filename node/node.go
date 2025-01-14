@@ -1,4 +1,4 @@
-// Copyright (c) 2024 Osyah
+// Copyright (c) 2024-2025 Osyah
 // SPDX-License-Identifier: MIT
 
 package node
@@ -29,7 +29,7 @@ func Run(configPath string) {
 
 	server := httpapi.New(cfg.Node.Transport.HTTPAPI, &httpapi.Service{
 		DApp:     container.Get[*dapp.Service](base, "dapp_local"),
-		Delivery: container.Get[*delivery.Query](base, "delivery_local"),
+		Delivery: container.Get[*delivery.Service](base, "delivery_local"),
 	}).Build()
 
 	go server.Listen()
