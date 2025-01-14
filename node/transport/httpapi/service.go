@@ -1,4 +1,4 @@
-// Copyright (c) 2024 Osyah
+// Copyright (c) 2024-2025 Osyah
 // SPDX-License-Identifier: MIT
 
 package httpapi
@@ -10,5 +10,5 @@ import (
 
 type Service struct {
 	DApp     *dapp.Service
-	Delivery *delivery.Query
+	Delivery *delivery.Service
 }
