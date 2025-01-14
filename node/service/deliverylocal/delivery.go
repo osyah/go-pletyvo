@@ -13,17 +13,16 @@ type Config struct {
 	Repos string `cfg:"repos"`
 }
 
-func NewQuery(repos *delivery.Repository) *delivery.Query {
-	return &delivery.Query{
+func New(repos *delivery.Repository) *delivery.Service {
+	return &delivery.Service{
 		Channel: NewChannel(repos.Channel),
+		Message: NewMessage(repos.Message),
 		Post:    NewPost(repos.Post),
 	}
 }
 
-func RegisterQuery(config Config) container.Handler {
+func Register(config Config) container.Handler {
 	return func(base *container.Base) any {
-		return NewQuery(
-			container.Get[*delivery.Repository](base, config.Repos),
-		)
+		return New(container.Get[*delivery.Repository](base, config.Repos))
 	}
 }

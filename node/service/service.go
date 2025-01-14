@@ -1,4 +1,4 @@
-// Copyright (c) 2024 Osyah
+// Copyright (c) 2024-2025 Osyah
 // SPDX-License-Identifier: MIT
 
 package service
@@ -20,6 +20,6 @@ func Register(base *container.Base, config Config) {
 	if config.DeliveryLocal == nil {
 		panic("go-pletyvo/node/service: 'delivery_local' config not found")
 	} else {
-		base.RegisterHandler("delivery_local", deliverylocal.RegisterQuery(*config.DeliveryLocal))
+		base.RegisterHandler("delivery_local", deliverylocal.Register(*config.DeliveryLocal))
 	}
 }
