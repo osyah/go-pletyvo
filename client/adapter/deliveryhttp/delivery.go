@@ -13,6 +13,7 @@ import (
 func New(engine engine.HTTP, signer crypto.Signer, event dapp.EventService) *delivery.Service {
 	return &delivery.Service{
 		Channel: NewChannel(engine, signer, event),
+		Message: NewMessage(engine),
 		Post:    NewPost(engine, signer, event),
 	}
 }
