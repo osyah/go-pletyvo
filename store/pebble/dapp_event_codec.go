@@ -1,4 +1,4 @@
-// Copyright (c) 2024 Osyah
+// Copyright (c) 2024-2025 Osyah
 // SPDX-License-Identifier: MIT
 
 package pebble
@@ -29,7 +29,7 @@ func marshalDAppEvent(event *dapp.SystemEvent) []byte {
 	return dst
 }
 
-func (dae DAppEvent) unmarshal(src []byte, event *dapp.Event) (err error) {
+func (DAppEvent) unmarshal(src []byte, event *dapp.Event) (err error) {
 	var fc easyproto.FieldContext
 
 	for len(src) > 0 {
@@ -61,7 +61,7 @@ func (dae DAppEvent) unmarshal(src []byte, event *dapp.Event) (err error) {
 				)
 			}
 
-			if err := dae.unmarshalAuth(data, &event.Auth); err != nil {
+			if err = unmarshalDAppAuth(data, &event.Auth); err != nil {
 				return err
 			}
 		}
@@ -70,7 +70,7 @@ func (dae DAppEvent) unmarshal(src []byte, event *dapp.Event) (err error) {
 	return
 }
 
-func (DAppEvent) unmarshalAuth(src []byte, auth *dapp.AuthHeader) (err error) {
+func unmarshalDAppAuth(src []byte, auth *dapp.AuthHeader) (err error) {
 	var fc easyproto.FieldContext
 
 	for len(src) > 0 {
@@ -78,7 +78,7 @@ func (DAppEvent) unmarshalAuth(src []byte, auth *dapp.AuthHeader) (err error) {
 		if err != nil {
 			return status.New(
 				pletyvo.CodeInternal,
-				"go-pletyvo/store/pebble: cannot read next DAppEvent auth field",
+				"go-pletyvo/store/pebble: cannot read next DApp auth field",
 			)
 		}
 
@@ -88,7 +88,7 @@ func (DAppEvent) unmarshalAuth(src []byte, auth *dapp.AuthHeader) (err error) {
 			if !ok {
 				return status.New(
 					pletyvo.CodeInternal,
-					"go-pletyvo/store/pebble: cannot read DAppEvent auth.schema",
+					"go-pletyvo/store/pebble: cannot read DApp auth.schema",
 				)
 			}
 
@@ -98,7 +98,7 @@ func (DAppEvent) unmarshalAuth(src []byte, auth *dapp.AuthHeader) (err error) {
 			if !ok {
 				return status.New(
 					pletyvo.CodeInternal,
-					"go-pletyvo/store/dapppebble: cannot read DAppEvent auth.public_key",
+					"go-pletyvo/store/dapppebble: cannot read DApp auth.public_key",
 				)
 			}
 
@@ -108,7 +108,7 @@ func (DAppEvent) unmarshalAuth(src []byte, auth *dapp.AuthHeader) (err error) {
 			if !ok {
 				return status.New(
 					pletyvo.CodeInternal,
-					"go-pletyvo/store/pebble: cannot read DAppEvent auth.signature",
+					"go-pletyvo/store/pebble: cannot read DApp auth.signature",
 				)
 			}
 
