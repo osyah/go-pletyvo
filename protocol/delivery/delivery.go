@@ -7,16 +7,19 @@ import "github.com/osyah/go-pletyvo/protocol/dapp"
 
 type Query struct {
 	Channel ChannelQuery
+	Message MessageQuery
 	Post    PostQuery
 }
 
 type Repository struct {
 	Channel ChannelRepository
+	Message MessageRepository
 	Post    PostRepository
 }
 
 type Service struct {
 	Channel ChannelService
+	Message MessageService
 	Post    PostService
 }
 
