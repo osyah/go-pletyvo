@@ -10,6 +10,7 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/osyah/go-pletyvo"
+	"github.com/osyah/go-pletyvo/protocol/dapp"
 	"github.com/osyah/go-pletyvo/protocol/delivery"
 )
 
@@ -30,6 +31,10 @@ func (m Message) GetByID(ctx context.Context, channel uuid.UUID, id uuid.UUID) (
 }
 
 func (m Message) Send(ctx context.Context, message *delivery.Message) error {
+	if message.Body.Version() != dapp.EventBodyBasic {
+		return pletyvo.CodeInvalidArgument
+	}
+
 	if message.Body.Type() != delivery.MessageCreate {
 		return pletyvo.CodeInvalidArgument
 	}
