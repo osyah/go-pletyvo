@@ -32,7 +32,7 @@ type PostInput struct {
 }
 
 func (pi PostInput) Validate() error {
-	if len(pi.Content) > 2048 {
+	if len(pi.Content) > 2048 || len(pi.Content) == 0 {
 		return status.New(pletyvo.CodeInvalidArgument, "invalid content length")
 	}
 
