@@ -13,8 +13,10 @@ import (
 	"github.com/osyah/go-pletyvo/protocol/dapp"
 )
 
+const MessageCreate = 768
+
 type Message struct {
-	Body MessageBody     `json:"body"`
+	Body dapp.EventBody  `json:"body"`
 	Auth dapp.AuthHeader `json:"auth"`
 }
 
