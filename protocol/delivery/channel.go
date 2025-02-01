@@ -30,7 +30,7 @@ type ChannelInput struct {
 }
 
 func (ci ChannelInput) Validate() error {
-	if len(ci.Name) > 40 {
+	if len(ci.Name) > 40 || len(ci.Name) == 0 {
 		return status.New(pletyvo.CodeInvalidArgument, "invalid name length")
 	}
 
