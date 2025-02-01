@@ -27,7 +27,7 @@ type MessageInput struct {
 }
 
 func (mi MessageInput) Validate() error {
-	if len(mi.Content) > 2048 {
+	if len(mi.Content) > 2048 || len(mi.Content) == 0 {
 		return status.New(pletyvo.CodeInvalidArgument, "invalid content length")
 	}
 
