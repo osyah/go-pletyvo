@@ -1,4 +1,4 @@
-// Copyright (c) 2024 Osyah
+// Copyright (c) 2024-2025 Osyah
 // SPDX-License-Identifier: MIT
 
 package crypto
@@ -12,6 +12,7 @@ import (
 type Signer interface {
 	Schema() byte
 	Sign([]byte) []byte
+	Private() []byte
 	Public() []byte
 	Address() dapp.Hash
 	Auth([]byte) dapp.AuthHeader

@@ -1,4 +1,4 @@
-// Copyright (c) 2024 Osyah
+// Copyright (c) 2024-2025 Osyah
 // SPDX-License-Identifier: MIT
 
 package crypto
@@ -38,6 +38,8 @@ func (ED25519) Schema() byte { return SchemaED25519 }
 func (ed ED25519) Sign(msg []byte) []byte {
 	return ed25519.Sign(ed.privateKey, msg)
 }
+
+func (ed ED25519) Private() []byte { return ed.privateKey }
 
 func (ed ED25519) Public() []byte {
 	publicKey := make([]byte, ed25519.PublicKeySize)
