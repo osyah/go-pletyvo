@@ -12,7 +12,6 @@ import (
 type Signer interface {
 	Schema() byte
 	Sign([]byte) []byte
-	Private() []byte
 	Public() []byte
 	Address() dapp.Hash
 	Auth([]byte) dapp.AuthHeader
