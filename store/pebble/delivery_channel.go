@@ -25,7 +25,7 @@ func (DeliveryChannel) key(network pletyvo.Network, id *uuid.UUID) []byte {
 	key[4] = DeliveryChannelPrefix
 
 	copy(key[0:4], network[2:6])
-	copy(key[6:], id[:])
+	copy(key[5:], id[:])
 
 	return key
 }
