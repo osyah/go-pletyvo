@@ -1,4 +1,4 @@
-// Copyright (c) 2024 Osyah
+// Copyright (c) 2024-2025 Osyah
 // SPDX-License-Identifier: MIT
 
 package pletyvo
@@ -23,6 +23,20 @@ var (
 )
 
 type Network [NetworkSize]byte
+
+func NewNetwork(zone uint16, payload uint32) Network {
+	var network Network
+
+	network[0] = byte(zone >> 8)
+	network[1] = byte(zone)
+
+	network[2] = byte(payload >> 24)
+	network[3] = byte(payload >> 16)
+	network[4] = byte(payload >> 8)
+	network[5] = byte(payload)
+
+	return network
+}
 
 func (n Network) String() string {
 	return base64.RawURLEncoding.EncodeToString(n[:])
