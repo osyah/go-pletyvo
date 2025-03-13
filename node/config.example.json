@@ -13,7 +13,7 @@
     "transport": {
       "http_api": {
         "server": {
-          "address": "localhost:8000",
+          "address": "localhost:8049",
           "fiber": {
             "prefork": false,
             "body_limit": 1024,
