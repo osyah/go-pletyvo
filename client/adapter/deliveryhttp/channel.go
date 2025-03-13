@@ -1,4 +1,4 @@
-// Copyright (c) 2024 Osyah
+// Copyright (c) 2024-2025 Osyah
 // SPDX-License-Identifier: MIT
 
 package deliveryhttp
@@ -39,8 +39,7 @@ func (c Channel) GetByID(ctx context.Context, id uuid.UUID) (*delivery.Channel, 
 
 func (c Channel) Create(ctx context.Context, input *delivery.ChannelCreateInput) (*dapp.EventResponse, error) {
 	body := dapp.NewEventBody(
-		dapp.EventBodyBasic, dapp.JSONDataType,
-		delivery.ChannelCreateEventType, input,
+		dapp.EventBodyBasic, dapp.JSONDataType, delivery.ChannelCreate, input,
 	)
 
 	return c.event.Create(ctx, &dapp.EventInput{
@@ -50,8 +49,7 @@ func (c Channel) Create(ctx context.Context, input *delivery.ChannelCreateInput)
 
 func (c Channel) Update(ctx context.Context, input *delivery.ChannelUpdateInput) (*dapp.EventResponse, error) {
 	body := dapp.NewEventBody(
-		dapp.EventBodyBasic, dapp.JSONDataType,
-		delivery.ChannelUpdateEventType, input,
+		dapp.EventBodyBasic, dapp.JSONDataType, delivery.ChannelUpdate, input,
 	)
 
 	return c.event.Create(ctx, &dapp.EventInput{

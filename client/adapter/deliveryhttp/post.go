@@ -53,8 +53,7 @@ func (p Post) GetByID(ctx context.Context, ch uuid.UUID, id uuid.UUID) (*deliver
 
 func (p Post) Create(ctx context.Context, input *delivery.PostCreateInput) (*dapp.EventResponse, error) {
 	body := dapp.NewEventBody(
-		dapp.EventBodyBasic, dapp.JSONDataType,
-		delivery.PostCreateEventType, input,
+		dapp.EventBodyBasic, dapp.JSONDataType, delivery.PostCreate, input,
 	)
 
 	return p.event.Create(ctx, &dapp.EventInput{
@@ -64,8 +63,7 @@ func (p Post) Create(ctx context.Context, input *delivery.PostCreateInput) (*dap
 
 func (p Post) Update(ctx context.Context, input *delivery.PostUpdateInput) (*dapp.EventResponse, error) {
 	body := dapp.NewEventBody(
-		dapp.EventBodyBasic, dapp.JSONDataType,
-		delivery.PostUpdateEventType, input,
+		dapp.EventBodyBasic, dapp.JSONDataType, delivery.PostUpdate, input,
 	)
 
 	return p.event.Create(ctx, &dapp.EventInput{
