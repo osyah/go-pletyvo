@@ -1,4 +1,4 @@
-// Copyright (c) 2024 Osyah
+// Copyright (c) 2024-2025 Osyah
 // SPDX-License-Identifier: MIT
 
 package delivery
@@ -16,8 +16,8 @@ func NewChannelExecutor(repos ChannelRepository) *ChannelExecutor {
 }
 
 func (ce ChannelExecutor) Register(handler *dapp.Handler) {
-	handler.Register(ChannelCreateEventType, ce.Create)
-	handler.Register(ChannelUpdateEventType, ce.Update)
+	handler.Register(ChannelCreate, ce.Create)
+	handler.Register(ChannelUpdate, ce.Update)
 }
 
 func (ce ChannelExecutor) Create(ctx context.Context, event *dapp.SystemEvent) error {

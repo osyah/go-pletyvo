@@ -14,8 +14,8 @@ import (
 )
 
 const (
-	ChannelCreateEventType = 3
-	ChannelUpdateEventType = 4
+	ChannelCreate = 3
+	ChannelUpdate = 4
 )
 
 type Channel struct {
