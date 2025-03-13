@@ -1,4 +1,4 @@
-// Copyright (c) 2024 Osyah
+// Copyright (c) 2024-2025 Osyah
 // SPDX-License-Identifier: MIT
 
 package dapplocal
@@ -46,6 +46,13 @@ func (e Event) Create(ctx context.Context, input *dapp.EventInput) (*dapp.EventR
 
 	if !input.Verify(crypto.EventInputVerifier) {
 		return nil, pletyvo.CodeUnauthorized
+	}
+
+	if input.Body.Version() == dapp.EventBodyLinked {
+		_, err = e.hash.GetByID(ctx, input.Body.Parent())
+		if err != nil {
+			return nil, pletyvo.CodeConflict
+		}
 	}
 
 	header.ID, err = uuid.NewV7()
