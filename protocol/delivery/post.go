@@ -14,8 +14,8 @@ import (
 )
 
 const (
-	PostCreateEventType = 5
-	PostUpdateEventType = 6
+	PostCreate = 5
+	PostUpdate = 6
 )
 
 type Post struct {

@@ -20,8 +20,8 @@ func NewPostExecutor(repos PostRepository, channel ChannelRepository) *PostExecu
 }
 
 func (pe PostExecutor) Register(handler *dapp.Handler) {
-	handler.Register(PostCreateEventType, pe.Create)
-	handler.Register(PostUpdateEventType, pe.Update)
+	handler.Register(PostCreate, pe.Create)
+	handler.Register(PostUpdate, pe.Update)
 }
 
 func (pe PostExecutor) Create(ctx context.Context, event *dapp.SystemEvent) error {
