@@ -33,11 +33,17 @@ func (m Message) RegisterRoutes(router fiber.Router) {
 func (m Message) sendHandler(ctx *fiber.Ctx) error {
 	var message delivery.Message
 
-	if err := ctx.BodyParser(&message); err != nil {
+	err := ctx.BodyParser(&message)
+	if err != nil {
 		return ctx.SendStatus(fiber.StatusBadRequest)
 	}
 
-	return m.service.Send(ctx.Context(), &message)
+	err = m.service.Send(ctx.Context(), &message)
+	if err != nil {
+		return http.ErrorHandler(ctx, err)
+	}
+
+	return ctx.SendStatus(fiber.StatusOK)
 }
 
 func (m Message) getHandler(ctx *fiber.Ctx) error {
