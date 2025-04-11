@@ -4,11 +4,16 @@
 package delivery
 
 import (
-	"errors"
 	"strings"
+
+	"github.com/osyah/hryzun/status"
+
+	"github.com/osyah/go-pletyvo"
 )
 
-var ErrEmptyContent = errors.New("empty content")
+var ErrEmptyContent = status.New(
+	pletyvo.CodeInvalidArgument, "empty content",
+)
 
 func PrepareContent(s string) string {
 	return strings.Trim(s, " \n\r\t")
