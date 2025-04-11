@@ -32,11 +32,11 @@ func (m Message) GetByID(ctx context.Context, channel uuid.UUID, id uuid.UUID) (
 
 func (m Message) Send(ctx context.Context, message *delivery.Message) error {
 	if message.Body.Version() != dapp.EventBodyBasic {
-		return pletyvo.CodeInvalidArgument
+		return dapp.ErrInvalidEventBodyVersion
 	}
 
 	if message.Body.Type() != delivery.MessageCreate {
-		return pletyvo.CodeInvalidArgument
+		return dapp.ErrInvalidEventType
 	}
 
 	var input delivery.MessageInput
@@ -55,8 +55,9 @@ func (m Message) Send(ctx context.Context, message *delivery.Message) error {
 	}
 
 	sec, _ := input.ID.Time().UnixTime()
-	if uint32((time.Now().Unix() - sec)) > 5 {
-		return pletyvo.CodeInvalidArgument
+	interval := time.Now().Unix() - sec
+	if interval > 5 || interval < -5 {
+		return delivery.ErrInvalidMessageTime
 	}
 
 	return m.repos.Create(ctx, message, &input)
