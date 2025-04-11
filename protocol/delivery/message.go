@@ -15,6 +15,10 @@ import (
 
 const MessageCreate = 768
 
+var ErrInvalidMessageTime = status.New(
+	pletyvo.CodeInvalidArgument, "invalid message time",
+)
+
 type Message struct {
 	Body dapp.EventBody  `json:"body"`
 	Auth dapp.AuthHeader `json:"auth"`
