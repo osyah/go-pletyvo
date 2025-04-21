@@ -45,10 +45,10 @@ type MessageQuery interface {
 
 type MessageRepository interface {
 	MessageQuery
-	Create(context.Context, *Message, *MessageInput) error
+	Create(context.Context, *dapp.EventInput, *MessageInput) error
 }
 
 type MessageService interface {
 	MessageQuery
-	Send(context.Context, *Message) error
+	Send(context.Context, *dapp.EventInput) error
 }
