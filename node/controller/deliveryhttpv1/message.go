@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/osyah/go-pletyvo/node/pkg/net/http"
+	"github.com/osyah/go-pletyvo/protocol/dapp"
 	"github.com/osyah/go-pletyvo/protocol/delivery"
 )
 
@@ -31,14 +32,14 @@ func (m Message) RegisterRoutes(router fiber.Router) {
 }
 
 func (m Message) sendHandler(ctx *fiber.Ctx) error {
-	var message delivery.Message
+	var input dapp.EventInput
 
-	err := ctx.BodyParser(&message)
+	err := ctx.BodyParser(&input)
 	if err != nil {
 		return ctx.SendStatus(fiber.StatusBadRequest)
 	}
 
-	err = m.service.Send(ctx.Context(), &message)
+	err = m.service.Send(ctx.Context(), &input)
 	if err != nil {
 		return http.ErrorHandler(ctx, err)
 	}

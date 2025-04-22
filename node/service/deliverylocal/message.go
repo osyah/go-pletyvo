@@ -30,7 +30,7 @@ func (m Message) GetByID(ctx context.Context, channel uuid.UUID, id uuid.UUID) (
 	return m.repos.GetByID(ctx, channel, id)
 }
 
-func (m Message) Send(ctx context.Context, message *delivery.Message) error {
+func (m Message) Send(ctx context.Context, message *dapp.EventInput) error {
 	if message.Body.Version() != dapp.EventBodyBasic {
 		return dapp.ErrInvalidEventBodyVersion
 	}

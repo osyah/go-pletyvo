@@ -10,6 +10,7 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/osyah/go-pletyvo"
+	"github.com/osyah/go-pletyvo/protocol/dapp"
 	"github.com/osyah/go-pletyvo/protocol/delivery"
 )
 
@@ -115,7 +116,7 @@ func (dm DeliveryMessage) GetByID(ctx context.Context, ch, id uuid.UUID) (*deliv
 	return &message, nil
 }
 
-func (dm DeliveryMessage) Create(ctx context.Context, message *delivery.Message, input *delivery.MessageInput) error {
+func (dm DeliveryMessage) Create(ctx context.Context, message *dapp.EventInput, input *delivery.MessageInput) error {
 	network, ok := ctx.Value(pletyvo.ContextKeyNetwork).(pletyvo.Network)
 	if !ok {
 		network = pletyvo.DefaultNetwork

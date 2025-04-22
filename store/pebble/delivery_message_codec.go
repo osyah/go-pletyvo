@@ -8,10 +8,11 @@ import (
 	"github.com/osyah/hryzun/status"
 
 	"github.com/osyah/go-pletyvo"
+	"github.com/osyah/go-pletyvo/protocol/dapp"
 	"github.com/osyah/go-pletyvo/protocol/delivery"
 )
 
-func (DeliveryMessage) marshal(message *delivery.Message) []byte {
+func (DeliveryMessage) marshal(message *dapp.EventInput) []byte {
 	m := mp.Get()
 
 	mm := m.MessageMarshaler()

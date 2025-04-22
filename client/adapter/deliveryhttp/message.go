@@ -11,6 +11,7 @@ import (
 
 	"github.com/osyah/go-pletyvo"
 	"github.com/osyah/go-pletyvo/client/engine"
+	"github.com/osyah/go-pletyvo/protocol/dapp"
 	"github.com/osyah/go-pletyvo/protocol/delivery"
 )
 
@@ -45,6 +46,6 @@ func (m Message) GetByID(ctx context.Context, channel uuid.UUID, id uuid.UUID) (
 	return &message, nil
 }
 
-func (m Message) Send(ctx context.Context, message *delivery.Message) error {
+func (m Message) Send(ctx context.Context, message *dapp.EventInput) error {
 	return m.engine.Post(ctx, "/delivery/v1/channel/send", message, nil)
 }
