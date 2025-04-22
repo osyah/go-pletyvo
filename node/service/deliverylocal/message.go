@@ -11,6 +11,7 @@ import (
 
 	"github.com/osyah/go-pletyvo"
 	"github.com/osyah/go-pletyvo/protocol/dapp"
+	"github.com/osyah/go-pletyvo/protocol/dapp/crypto"
 	"github.com/osyah/go-pletyvo/protocol/delivery"
 )
 
@@ -37,6 +38,10 @@ func (m Message) Send(ctx context.Context, message *dapp.EventInput) error {
 
 	if message.Body.Type() != delivery.MessageCreate {
 		return dapp.ErrInvalidEventType
+	}
+
+	if !message.Verify(crypto.EventInputVerifier) {
+		return pletyvo.CodeUnauthorized
 	}
 
 	var input delivery.MessageInput
