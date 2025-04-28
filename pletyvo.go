@@ -8,8 +8,7 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-
-	"github.com/osyah/hryzun/status"
+	"github.com/osyah/hryzun"
 )
 
 type ContextKey uint8
@@ -17,7 +16,7 @@ type ContextKey uint8
 const ContextKeyNetwork ContextKey = iota
 
 const (
-	CodeNil status.Code = iota
+	CodeNil hryzun.Code = iota
 	CodeInternal
 	CodeNotFound
 	CodePermissionDenied

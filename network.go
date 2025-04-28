@@ -6,7 +6,7 @@ package pletyvo
 import (
 	"encoding/base64"
 
-	"github.com/osyah/hryzun/status"
+	"github.com/osyah/hryzun"
 )
 
 const (
@@ -17,7 +17,7 @@ const (
 var (
 	DefaultNetwork, NetworkNil Network
 
-	ErrInvalidNetworkFormat = status.New(
+	ErrInvalidNetworkFormat = hryzun.NewStatus(
 		CodeInvalidArgument, "invalid network format",
 	)
 )

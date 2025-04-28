@@ -1,9 +1,0 @@
-go 1.21.1
-
-use (
-	.
-	./client
-	./node
-	./protocol/dapp/crypto
-	./store/pebble
-)
