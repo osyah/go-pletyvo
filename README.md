@@ -1,6 +1,6 @@
-# `go-pletyvo`
+# Go Pletyvo
 
-The implementation of the Pletyvo decentralized platform in Go.
+Implementation of protocols of the Pletyvo decentralized platform on Go.
 
 ## Install
 
