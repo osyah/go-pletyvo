@@ -19,11 +19,6 @@ var ErrInvalidMessageTime = hryzun.NewStatus(
 	pletyvo.CodeInvalidArgument, "invalid message time",
 )
 
-type Message struct {
-	Body dapp.EventBody  `json:"body"`
-	Auth dapp.AuthHeader `json:"auth"`
-}
-
 type MessageInput struct {
 	ID      uuid.UUID `json:"id"`
 	Channel dapp.Hash `json:"channel"`
@@ -39,8 +34,8 @@ func (mi MessageInput) Validate() error {
 }
 
 type MessageQuery interface {
-	Get(context.Context, uuid.UUID, *pletyvo.QueryOption) ([]*Message, error)
-	GetByID(ctx context.Context, channel uuid.UUID, id uuid.UUID) (*Message, error)
+	Get(context.Context, uuid.UUID, *pletyvo.QueryOption) ([]*dapp.Event, error)
+	GetByID(ctx context.Context, channel uuid.UUID, id uuid.UUID) (*dapp.Event, error)
 }
 
 type MessageRepository interface {
