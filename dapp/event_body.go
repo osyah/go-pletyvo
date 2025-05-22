@@ -24,8 +24,8 @@ var (
 	ErrInvalidEventBodyVersion = hryzun.NewStatus(
 		pletyvo.CodeInvalidArgument, "invalid event body version",
 	)
-	ErrInvalidEventBodyDataType = hryzun.NewStatus(
-		pletyvo.CodeInvalidArgument, "invalid event body data type",
+	ErrInvalidEventBodyFormat = hryzun.NewStatus(
+		pletyvo.CodeInvalidArgument, "invalid event body format",
 	)
 	ErrInvalidEventType = hryzun.NewStatus(
 		pletyvo.CodeInvalidArgument, "unsupported event type",
@@ -38,12 +38,12 @@ type EventBody []byte
 
 func NewEventBody(version, dataType byte, eventType uint16, value any) EventBody {
 	if dataType != JSONDataType {
-		panic("go-pletyvo/protocol/dapp: unsupported event body data type")
+		panic("go-pletyvo/dapp: unsupported event body data type")
 	}
 
 	data, err := json.Marshal(value)
 	if err != nil {
-		panic("go-pletyvo/protocol/dapp: " + err.Error())
+		panic("go-pletyvo/dapp: " + err.Error())
 	}
 
 	body := make(EventBody, (len(data) + EventBodyMetaSize[version]))
@@ -60,7 +60,7 @@ func NewEventBody(version, dataType byte, eventType uint16, value any) EventBody
 
 func (eb EventBody) Version() byte { return eb[0] }
 
-func (eb EventBody) DataType() byte { return eb[1] }
+func (eb EventBody) Format() byte { return eb[1] }
 
 func (eb EventBody) Type() uint16 {
 	return uint16(eb[3]) | (uint16(eb[2]) << 8)
@@ -99,8 +99,8 @@ func (eb EventBody) Unmarshal(v any) error {
 		return ErrInvalidEventBodyVersion
 	}
 
-	if eb.DataType() != JSONDataType {
-		return ErrInvalidEventBodyDataType
+	if eb.Format() != JSONDataType {
+		return ErrInvalidEventBodyFormat
 	}
 
 	return json.Unmarshal(eb.Data(), v)
@@ -110,7 +110,7 @@ func (eb EventBody) Parent() Hash { return Hash(eb[4:36]) }
 
 func (eb EventBody) SetParent(hash Hash) {
 	if eb.Version() != EventBodyLinked {
-		panic("go-pletyvo/protocol/dapp: event body dont support linked version")
+		panic("go-pletyvo/dapp: event body dont support linked version")
 	}
 
 	copy(eb[4:36], hash[:])

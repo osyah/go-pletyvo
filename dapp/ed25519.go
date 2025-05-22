@@ -25,7 +25,7 @@ func GenerateED25519(r io.Reader) *ED25519 {
 	seed := make([]byte, ed25519.SeedSize)
 
 	if _, err := io.ReadFull(r, seed); err != nil {
-		panic("go-pletyvo/protocol/dapp: " + err.Error())
+		panic("go-pletyvo/dapp: " + err.Error())
 	}
 
 	return NewED25519(seed)
