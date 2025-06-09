@@ -8,7 +8,7 @@ import (
 
 	"github.com/osyah/hryzun"
 
-	"github.com/osyah/go-pletyvo"
+	"github.com/istyna/go-pletyvo"
 )
 
 var ErrEmptyContent = hryzun.NewStatus(

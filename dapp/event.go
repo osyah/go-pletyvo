@@ -9,7 +9,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/osyah/go-pletyvo"
+	"github.com/istyna/go-pletyvo"
 )
 
 type Event struct {

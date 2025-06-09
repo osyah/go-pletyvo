@@ -6,8 +6,8 @@ package delivery
 import (
 	"context"
 
-	"github.com/osyah/go-pletyvo"
-	"github.com/osyah/go-pletyvo/dapp"
+	"github.com/istyna/go-pletyvo"
+	"github.com/istyna/go-pletyvo/dapp"
 )
 
 type PostExecutor struct {

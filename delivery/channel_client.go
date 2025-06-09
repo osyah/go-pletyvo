@@ -9,8 +9,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/osyah/go-pletyvo"
-	"github.com/osyah/go-pletyvo/dapp"
+	"github.com/istyna/go-pletyvo"
+	"github.com/istyna/go-pletyvo/dapp"
 )
 
 const channelPath = "/delivery/v1/channel/%s"

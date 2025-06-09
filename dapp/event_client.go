@@ -8,7 +8,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/osyah/go-pletyvo"
+	"github.com/istyna/go-pletyvo"
 )
 
 type EventClient struct{ engine pletyvo.DefaultEngine }

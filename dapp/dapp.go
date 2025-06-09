@@ -3,7 +3,7 @@
 
 package dapp
 
-import "github.com/osyah/go-pletyvo"
+import "github.com/istyna/go-pletyvo"
 
 type AuthHeader struct {
 	Schema    byte   `json:"sch"`

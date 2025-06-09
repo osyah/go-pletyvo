@@ -6,7 +6,7 @@ package dapp
 import (
 	"context"
 
-	"github.com/osyah/go-pletyvo"
+	"github.com/istyna/go-pletyvo"
 )
 
 type HashClient struct{ engine pletyvo.DefaultEngine }

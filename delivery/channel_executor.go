@@ -6,7 +6,7 @@ package delivery
 import (
 	"context"
 
-	"github.com/osyah/go-pletyvo/dapp"
+	"github.com/istyna/go-pletyvo/dapp"
 )
 
 type ChannelExecutor struct{ repos ChannelRepository }

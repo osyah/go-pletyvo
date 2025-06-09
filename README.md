@@ -1,9 +1,9 @@
-# Go Pletyvo
+# Experimental Go Pletyvo
 
-Implementation of protocols of the Pletyvo decentralized platform on Go.
+Experimental implementation of the Pletyvo decentralized platform SDK on Go.
 
 ## Install
 
 ```
-go get -u github.com/osyah/go-pletyvo
+go get -u github.com/istyna/go-pletyvo
 ```

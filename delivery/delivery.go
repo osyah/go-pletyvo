@@ -4,8 +4,8 @@
 package delivery
 
 import (
-	"github.com/osyah/go-pletyvo"
-	"github.com/osyah/go-pletyvo/dapp"
+	"github.com/istyna/go-pletyvo"
+	"github.com/istyna/go-pletyvo/dapp"
 )
 
 type Repository struct {

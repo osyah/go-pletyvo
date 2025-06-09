@@ -1,4 +1,4 @@
-module github.com/osyah/go-pletyvo
+module github.com/istyna/go-pletyvo
 
 go 1.24.2
 
